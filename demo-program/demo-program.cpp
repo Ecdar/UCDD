@@ -36,7 +36,7 @@ using std::cerr;
 using std::cout;
 using base::Timer;
 
-/* Inner repeat loop.
+/* Inner repeat loop. Inner loop of what?
  */
 #define LOOP 100
 
