@@ -338,7 +338,7 @@ static cdd buildCDDWithBooleansTest(size_t size, int number_of_DBMs, int number_
     for (int i = 0; i < number_of_booleans; i++) {
 
 
-        if (random() < 0.5) {
+        if (rand() < RAND_MAX/2) {
             printf("Random is working");
             cdd new_cdd = cdd_bddvarpp(bdd_start_level + i);
             print_cdd(new_cdd);
