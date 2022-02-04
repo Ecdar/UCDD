@@ -60,7 +60,8 @@ static void printInterval(FILE* ofile, raw_t lower, raw_t upper)
  */
 static void cdd_fprintdot_rec(FILE* ofile, ddNode* r)
 {
-    // assert(cdd_rglr(r) == r);
+    //assert(cdd_rglr(r) == r);
+
 
     if (cdd_isterminal(r) || cdd_ismarked(r)) {
         return;
@@ -69,37 +70,35 @@ static void cdd_fprintdot_rec(FILE* ofile, ddNode* r)
     if (cdd_info(r)->type == TYPE_BDD) {
         bddNode* node = bdd_node(r);
 
-        fprintf(ofile, "\"%p\" [label=\"b%d\"];\n", (void*)node, node->level);
+        fprintf(ofile, "\"%p\" [label=\"b%d\"];\n", (void*)r, node->level);
 
         // REVISIT: Check what happens if children are negated.
 
-        if (node->high != cddfalse) {
-            fprintf(ofile, "\"%p\" -> \"%p\" [style=\"filled", (void*)node, (void*)node->high);
-            fprintf(ofile, "\"];\n");
-        }
-        if (node->low != cddfalse) {
-            fprintf(ofile, "\"%p\" -> \"%p\" [style=\"dashed", (void*)node, (void*)node->low);
-            fprintf(ofile, "\"];\n");
-        }
+        //if (node->high != cddfalse) {
+        // high edge cannot go to false terminal
+        assert(node->high != cddfalse);
 
-        if (node->high != cddfalse) {
-            cdd_fprintdot_rec(ofile, node->high);
-        }
-        if (node->low != cddfalse) {
-            cdd_fprintdot_rec(ofile, node->low);
-        }
+        fprintf(ofile, "\"%p\" -> \"%p\" [style=\"filled", (void*)r, (void*)node->high);
+        fprintf(ofile, "\"];\n");
+
+        fprintf(ofile, "\"%p\" -> \"%p\" [style=\"dashed", (void*)r, (void*)node->low);
+        fprintf(ofile, "\"];\n");
+
+        cdd_fprintdot_rec(ofile, node->high);
+        cdd_fprintdot_rec(ofile, node->low);
+
     } else {
         raw_t bnd = -INF;
         cddNode* node = cdd_node(r);
         Elem* p = node->elem;
 
-        fprintf(ofile, "\"%p\" [label=\"x%d-x%d\"];\n", (void*)node, cdd_info(node)->clock1,
+        fprintf(ofile, "\"%p\" [label=\"x%d-x%d\"];\n", (void*)r, cdd_info(node)->clock1,
                 cdd_info(node)->clock2);
 
         do {
             ddNode* child = p->child;
             if (child != cddfalse) {
-                fprintf(ofile, "\"%p\" -> \"%p\" [style=%s, label=\"", (void*)node,
+                fprintf(ofile, "\"%p\" -> \"%p\" [style=%s, label=\"", (void*)r,
                         (void*)cdd_rglr(child), cdd_mask(child) ? "dashed" : "filled");
                 printInterval(ofile, bnd, p->bnd);
                 fprintf(ofile, "\"];\n");
@@ -119,9 +118,14 @@ void cdd_fprintdot(FILE* ofile, ddNode* r)
     fprintf(ofile,
             "\"%p\" [shape=box, label=\"0\", style=filled, shape=box, height=0.3, width=0.3];\n",
             (void*)cddfalse);
+    // Print the true terminal (might not be connected to anything)
+    // TODO: Print fake root if r is negated <-- old comment
+    fprintf(ofile,
+            "\"%p\" [shape=box, label=\"1\", style=filled, shape=box, height=0.3, width=0.3];\n",
+            (void*)cddtrue);
 
-    cdd_fprintdot_rec(ofile, cdd_rglr(r));
-    // TODO: Print fake root if r is negated
+    cdd_fprintdot_rec(ofile, r);
+
 
     fprintf(ofile, "}\n");
     cdd_unmark(r);
