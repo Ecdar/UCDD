@@ -341,13 +341,13 @@ static cdd buildCDDWithBooleansTest(size_t size, int number_of_DBMs, int number_
         if (rand() < RAND_MAX/2) {
             printf("Random is working");
             cdd new_cdd = cdd_bddvarpp(bdd_start_level + i);
-            print_cdd(new_cdd);
+            print_cdd(new_cdd, "non_negated");
             cdd_result |= new_cdd;
         } else  {
             printf("Random is NOT working");
 
             cdd new_cdd = cdd_bddnvarpp(bdd_start_level + i);
-            print_cdd(new_cdd);
+            print_cdd(new_cdd, "negated");
             cdd_result |= new_cdd;
         }
 
@@ -385,7 +385,7 @@ int main(int argc, char* argv[])
     }
 
 
-    //cdd_main = buildCDDWithBooleansTest(number_of_clocks+1, number_of_DBMs, number_of_booleans, bdd_start_level);
+    cdd cdd_main = buildCDDWithBooleansTest(number_of_clocks+1, number_of_DBMs, number_of_booleans, bdd_start_level);
     //cdd_main = buildSimpleStaticBDD(bdd_start_level);
 
    // print_cdd(cdd_main, "main");
