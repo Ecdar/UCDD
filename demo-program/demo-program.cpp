@@ -386,7 +386,7 @@ int main(int argc, char* argv[])
 
 
     //cdd_main = buildCDDWithBooleansTest(number_of_clocks+1, number_of_DBMs, number_of_booleans, bdd_start_level);
-    //cdd_main = buildSimpleStaticBDD(bdd_start_level);
+    cdd cdd_main = buildSimpleStaticBDD(bdd_start_level);
 
    // print_cdd(cdd_main, "main");
 
