@@ -82,7 +82,7 @@ void cdd2Dot(char* fname, ddNode* node, char* name);
 
 /*=== INTERNAL PROTOTYPES ==============================================*/
 static int32_t cdd_contains_rec(ddNode*, raw_t*, int32_t dim);
-static ddNode* cdd_apply_rec(ddNode*, ddNode*);
+static ddNode* cdd_apply_rec(ddNode*, ddNode*, bool forced);
 #ifdef EX
 static ddNode* cdd_exist_rec(ddNode* node, int32_t*, int32_t*, raw_t*);
 #else
@@ -140,11 +140,12 @@ void cdd_operator_flush()
 #endif
 }
 
-ddNode* cdd_apply(ddNode* l, ddNode* h, int32_t op)
+
+ddNode* cdd_apply_forced(ddNode* l, ddNode* h, int32_t op)
 {
     ddNode* res;
     applyop = op;
-    res = cdd_apply_rec(l, h);
+    res = cdd_apply_rec(l, h, true);
     if (cdd_errorcond) {
         cdd_error(cdd_errorcond);
         return NULL;
@@ -152,7 +153,24 @@ ddNode* cdd_apply(ddNode* l, ddNode* h, int32_t op)
     return res;
 }
 
-static ddNode* cdd_apply_rec(ddNode* l, ddNode* r)
+ddNode* cdd_push_negate(ddNode* r) {
+    return cdd_apply_forced(r, r, cddop_and);
+}
+
+
+ddNode* cdd_apply(ddNode* l, ddNode* h, int32_t op)
+{
+    ddNode* res;
+    applyop = op;
+    res = cdd_apply_rec(l, h, false);
+    if (cdd_errorcond) {
+        cdd_error(cdd_errorcond);
+        return NULL;
+    }
+    return res;
+}
+
+static ddNode* cdd_apply_rec(ddNode* l, ddNode* r, bool forced)
 {
     CddCacheData* entry;
     int32_t lmask;
@@ -176,60 +194,62 @@ static ddNode* cdd_apply_rec(ddNode* l, ddNode* r)
     }
 
     /* Termination conditons */
-    switch (applyop) {
-    case cddop_and:
-        if (l == r || r == cddtrue) {
+    if (!forced) {
+        switch (applyop) {
+            case cddop_and:
+                if (l == r || r == cddtrue) {
+                    return l;
+                }
+                if (l == cddfalse || r == cddfalse || l == cdd_neg(r)) {
+                    return cddfalse;
+                }
+                if (l == cddtrue) {
+                    return r;
+                }
+                break;
+            case cddop_xor:
+                if (l == r) {
+                    return cddfalse;
+                }
+                if (l == cdd_neg(r)) {
+                    return cddtrue;
+                }
+                if (l == cddfalse) {
+                    return r;
+                }
+                if (r == cddfalse) {
+                    return l;
+                }
+                if (l == cddtrue) {
+                    return cdd_neg(r);
+                }
+                if (r == cddtrue) {
+                    return cdd_neg(l);
+                }
+                break;
+        }
+
+    }
+        /* The operation is symmetric; normalise for better cache performance */
+        if (l > r) {
+            n = l;
+            l = r;
+            r = n;
+        }
+
+        if (cdd_isterminal(l) && cdd_isterminal(r)) {
+            /* This may happen only for extra terminals and it
+             * is strange. We may return either of l or r.
+             */
+    #ifdef MULTI_TERMINAL
+            assert(cdd_is_extra_terminal(l) && cdd_is_extra_terminal(r));
+    #endif
+            if (l != r) {
+                fprintf(stderr, "Diagram is wrong: '%s' between extra terminal nodes.\n",
+                        applyop == cddop_and ? "and" : "xor");
+            }
             return l;
         }
-        if (l == cddfalse || r == cddfalse || l == cdd_neg(r)) {
-            return cddfalse;
-        }
-        if (l == cddtrue) {
-            return r;
-        }
-        break;
-    case cddop_xor:
-        if (l == r) {
-            return cddfalse;
-        }
-        if (l == cdd_neg(r)) {
-            return cddtrue;
-        }
-        if (l == cddfalse) {
-            return r;
-        }
-        if (r == cddfalse) {
-            return l;
-        }
-        if (l == cddtrue) {
-            return cdd_neg(r);
-        }
-        if (r == cddtrue) {
-            return cdd_neg(l);
-        }
-        break;
-    }
-
-    /* The operation is symmetric; normalise for better cache performance */
-    if (l > r) {
-        n = l;
-        l = r;
-        r = n;
-    }
-
-    if (cdd_isterminal(l) && cdd_isterminal(r)) {
-        /* This may happen only for extra terminals and it
-         * is strange. We may return either of l or r.
-         */
-#ifdef MULTI_TERMINAL
-        assert(cdd_is_extra_terminal(l) && cdd_is_extra_terminal(r));
-#endif
-        if (l != r) {
-            fprintf(stderr, "Diagram is wrong: '%s' between extra terminal nodes.\n",
-                    applyop == cddop_and ? "and" : "xor");
-        }
-        return l;
-    }
 
     /* Do cache lookup */
     //    fprintf(stderr, "%u\n", APPLYHASH(l, r, applyop) % 10000);
@@ -272,7 +292,7 @@ static ddNode* cdd_apply_rec(ddNode* l, ddNode* r)
         first = cdd_refstacktop;
 
         /* Do first recursion - check whether first edge is negated */
-        prev = cdd_apply_rec(cdd_neg_cond(lp->child, lmask), cdd_neg_cond(rp->child, rmask));
+        prev = cdd_apply_rec(cdd_neg_cond(lp->child, lmask), cdd_neg_cond(rp->child, rmask), forced);
         cdd_ref(prev);
         mask = cdd_mask(prev);
         bnd = minimum(lp->bnd, rp->bnd);
@@ -281,7 +301,7 @@ static ddNode* cdd_apply_rec(ddNode* l, ddNode* r)
         while (bnd < INF) {
             lp += (lp->bnd == bnd);
             rp += (rp->bnd == bnd);
-            n = cdd_apply_rec(cdd_neg_cond(lp->child, lmask), cdd_neg_cond(rp->child, rmask));
+            n = cdd_apply_rec(cdd_neg_cond(lp->child, lmask), cdd_neg_cond(rp->child, rmask), forced);
             if (n != prev) {
                 cdd_push(cdd_neg_cond(prev, mask), bnd);
                 prev = n;
@@ -319,11 +339,11 @@ static ddNode* cdd_apply_rec(ddNode* l, ddNode* r)
             rl = rh = r;
         }
 
-        n = cdd_apply_rec(cdd_neg_cond(ll, lmask), cdd_neg_cond(rl, rmask));
+        n = cdd_apply_rec(cdd_neg_cond(ll, lmask), cdd_neg_cond(rl, rmask), forced);
         cdd_ref(n);
         entry->res =
             cdd_make_bdd_node(minimum(l->level, r->level), n,
-                              cdd_apply_rec(cdd_neg_cond(lh, lmask), cdd_neg_cond(rh, rmask)));
+                              cdd_apply_rec(cdd_neg_cond(lh, lmask), cdd_neg_cond(rh, rmask), forced));
         cdd_deref(n);
     }
 
