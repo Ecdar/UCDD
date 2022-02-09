@@ -80,20 +80,20 @@ uint32_t printCounter = 0; // Used to number printed CDDs
 
 typedef void (*TestFunction)(size_t size);
 
-static void print_cdd(cdd to_print, char* name) {
+static void print_cdd(cdd to_print, char* name, bool push_negate) {
     char filename[30];
     sprintf(filename, "%s_%d.dot", name, printCounter);
     printf("Printing cdd %s to file : \n", name);
     FILE *fp_main;
     fp_main = fopen(filename, "w");
-    cdd_fprintdot(fp_main, to_print);
+    cdd_fprintdot(fp_main, to_print, push_negate);
     fclose(fp_main);
 
     printCounter++;
 }
 
-static void print_cdd(cdd to_print) {
-    print_cdd(to_print, "");
+static void print_cdd(cdd to_print, bool push_negate) {
+    print_cdd(to_print, "",push_negate);
 }
 
 /* test conversion between CDD and DBMs
@@ -283,7 +283,7 @@ static cdd buildSimpleStaticBDD(int bdd_start_level) {
 
 /*
     cdd trueNode = cdd_true();
-    print_cdd(trueNode);
+    print_cdd(trueNode, "true_node");
 
     cdd falseNode = cdd_false();
     print_cdd(falseNode);
@@ -305,10 +305,32 @@ static cdd buildSimpleStaticBDD(int bdd_start_level) {
 
     cdd topNodeTrue = cdd_bddvarpp(bdd_start_level + 0);
     cdd leftNode = topNodeTrue & myTrueNode;
-    cdd rightNode = !topNodeTrue & negated;
+    cdd rightNode = (!topNodeTrue) & negated;
     cdd topNode = leftNode | rightNode;
 
-    print_cdd(topNode);
+    print_cdd(rightNode, "rightNode", false);
+    print_cdd(rightNode, "rightNode_pushed", true);
+
+    print_cdd(negated, "negated", true);
+    print_cdd(topNode, "topnode", true);
+
+    topNode = !topNode;
+    print_cdd(topNode, "topnode_neg", true);
+
+    /*
+    print_cdd(rightNode, "rightNode");
+    rightNode= cdd_reduce2(rightNode);
+    print_cdd(rightNode, "rightNode_reduced");
+
+    print_cdd(leftNode, "leftNode");
+
+    leftNode= cdd_reduce2(leftNode);
+    print_cdd(leftNode, "leftNode_reduced");
+
+
+
+
+    */
 
     return topNode;
 }
@@ -331,7 +353,7 @@ static cdd buildCDDWithBooleansTest(size_t size, int number_of_DBMs, int number_
         cdd_result |= cdd(dbm, size);
 
 
-        print_cdd(cdd_result);
+        print_cdd(cdd_result, false);
     }
 
 
@@ -380,13 +402,13 @@ int main(int argc, char* argv[])
     int bdd_level_count = cdd_get_bdd_level_count();
 
     // Call test method
-    for (int i = 0; i < 1; i++) {
-        cdd cdd_main = test1_CDD_from_random_DBMs(number_of_clocks_including_zero, number_of_DBMs);
-    }
+    //for (int i = 0; i < 1; i++) {
+    //    cdd cdd_main = test1_CDD_from_random_DBMs(number_of_clocks_including_zero, number_of_DBMs);
+    //}
 
 
-    cdd cdd_main = buildCDDWithBooleansTest(number_of_clocks+1, number_of_DBMs, number_of_booleans, bdd_start_level);
-    //cdd_main = buildSimpleStaticBDD(bdd_start_level);
+    //cdd cdd_main = buildCDDWithBooleansTest(number_of_clocks+1, number_of_DBMs, number_of_booleans, bdd_start_level);
+    cdd cdd_main = buildSimpleStaticBDD(bdd_start_level);
 
    // print_cdd(cdd_main, "main");
 
