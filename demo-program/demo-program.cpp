@@ -317,6 +317,8 @@ static cdd buildSimpleStaticBDD(int bdd_start_level) {
     topNode = !topNode;
     print_cdd(topNode, "topnode_neg", true);
 
+
+
     /*
     print_cdd(rightNode, "rightNode");
     rightNode= cdd_reduce2(rightNode);
@@ -356,7 +358,7 @@ static cdd buildCDDWithBooleansTest(size_t size, int number_of_DBMs, int number_
         print_cdd(cdd_result, false);
     }
 
-
+/*
     for (int i = 0; i < number_of_booleans; i++) {
 
 
@@ -375,7 +377,19 @@ static cdd buildCDDWithBooleansTest(size_t size, int number_of_DBMs, int number_
 
 
     }
+    */
 
+    cdd b1 = cdd_bddvarpp(bdd_start_level + 0);
+    cdd b2 = cdd_bddvarpp(bdd_start_level + 1);
+    cdd b3 = cdd_bddvarpp(bdd_start_level + 2);
+    cdd b4 = cdd_bddvarpp(bdd_start_level + 3);
+    cdd nb2 = cdd_bddnvarpp(bdd_start_level + 1);
+    cdd nb3 = cdd_bddnvarpp(bdd_start_level + 2);
+    cdd nb4 = cdd_bddnvarpp(bdd_start_level + 3);
+
+
+    cdd_result = cdd_result &  (b1 & b2 & !b3) | (!b1 & !b2 & !b3);
+    print_cdd(cdd_result, "combination", false);
     return cdd_result;
 }
 
@@ -384,6 +398,45 @@ static cdd buildCDDWithBooleansTest(size_t size, int number_of_DBMs, int number_
 int test_global_1(int seed) {
 
 
+}
+
+static cdd MartijnTest(int bdd_start_level)
+{
+    cdd b6 = cdd_bddvarpp(bdd_start_level + 0);
+    cdd b7 = cdd_bddvarpp(bdd_start_level + 1);
+    cdd b8 = cdd_bddvarpp(bdd_start_level + 2);
+    cdd b9 = cdd_bddvarpp(bdd_start_level + 3);
+
+    cdd result;
+    // single traces
+    result =  (!b6 & !b7 & !b8 & b9);
+    print_cdd(result, "!b6!b7!b8b9", true);
+
+    result =  (!b6 & !b7 & b8 & b9);
+    print_cdd(result, "!b6!b7b8b9", true);
+
+    result =  (!b6 & b7 & b8 & b9);
+    print_cdd(result, "!b6b7b8b9", true);
+
+    result =  (!b6 & b7 & b8 & !b9);
+    print_cdd(result, "!b6b7b8!b9", true);
+
+    result =  (b6 & b7 & !b8 & !b9);
+    print_cdd(result, "b6b7!b8!b9", true);
+
+    result = (b6 & b7 & b8) | (!b6 & !b7 & !b8);
+    print_cdd(result, "b6b7b8or!b6!b7!b8", true);
+
+    result = (b6 & b7 & b8) | (!b6 & !b7 & b8);
+    print_cdd(result, "b6b7b8or!b6!b7b8", true);
+
+    result = (b6 & b7 & b8) | (!b6 & b7 & b8);
+    print_cdd(result, "b6b7b8or!b6b7b8", true);
+
+    result = (b6 & b7 & !b8) | (!b6 & b7 & !b8);
+    print_cdd(result, "b6b7!b8or!b6b7!b8", true);
+
+    return result;
 }
 
 int main(int argc, char* argv[])
@@ -407,9 +460,9 @@ int main(int argc, char* argv[])
     //}
 
 
-    //cdd cdd_main = buildCDDWithBooleansTest(number_of_clocks+1, number_of_DBMs, number_of_booleans, bdd_start_level);
-    cdd cdd_main = buildSimpleStaticBDD(bdd_start_level);
-
+    cdd cdd_main = buildCDDWithBooleansTest(number_of_clocks+1, number_of_DBMs, number_of_booleans, bdd_start_level);
+    // cdd_main = buildSimpleStaticBDD(bdd_start_level);
+     cdd_main = MartijnTest(bdd_start_level);
    // print_cdd(cdd_main, "main");
 
     /*
