@@ -400,6 +400,57 @@ int test_global_1(int seed) {
 
 }
 
+
+
+static bool cddContainsBoolStateRec(ddNode* r, bool state[], int bdd_start_level, int index, bool negated) {
+    assert(cdd_info(r)->type == TYPE_BDD);
+    bddNode* node = bdd_node(r);
+
+    if (node->level!=index+bdd_start_level)
+        return (cddContainsBoolStateRec(r, state, bdd_start_level, index+1, negated));
+
+    if (node->high==cddtrue) {
+        if (state[index]) return true ^ negated ^ cdd_is_negated(r);
+    }
+    if (node->high==cddfalse) {
+        if (state[index]) return false ^ negated ^ cdd_is_negated(r);
+    }
+    if (node->low==cddtrue) {
+        if (!state[index]) return true ^ negated ^ cdd_is_negated(r);
+    }
+    if (node->low==cddfalse) {
+        if (!state[index]) return false ^ negated ^ cdd_is_negated(r);
+    }
+
+    if (state[index])
+        return cddContainsBoolStateRec(node->high, state, bdd_start_level, index+1, negated ^ cdd_is_negated(r));
+    else
+        return cddContainsBoolStateRec(node->low, state, bdd_start_level, index+1, negated ^ cdd_is_negated(r));
+
+}
+
+
+static bool cddContainsStateRec(ddNode* r, bool state[], int bdd_start_level, int index, bool negated) {
+
+    if (cdd_info(r)->type == TYPE_BDD)
+        return cddContainsBoolStateRec(r,state, bdd_start_level,index, negated);
+    else
+    {
+        // TODO: this part is just skipped at the moment, add support for CDDs
+        printf("encountrered CDD");
+        cddNode* node = cdd_node(r);
+        return cddContainsStateRec(node->next,state, bdd_start_level,index, negated);
+    }
+
+}
+
+bool cddContainsBoolState( ddNode* cdd_, bool state[], int bdd_start_level)
+{
+
+   return cddContainsStateRec(cdd_, state, bdd_start_level, 0, false);
+}
+
+
 static cdd MartijnTest(int bdd_start_level)
 {
     cdd b6 = cdd_bddvarpp(bdd_start_level + 0);
@@ -411,30 +462,96 @@ static cdd MartijnTest(int bdd_start_level)
     // single traces
     result =  (!b6 & !b7 & !b8 & b9);
     print_cdd(result, "!b6!b7!b8b9", true);
+    bool state[4] = {false, false, false,true};
+    assert(cddContainsBoolState(result.handle(), state, bdd_start_level));
+    bool state1[4] = {false, false, true,true};
+    assert(!cddContainsBoolState(result.handle(), state1, bdd_start_level));
+
 
     result =  (!b6 & !b7 & b8 & b9);
     print_cdd(result, "!b6!b7b8b9", true);
+    bool state2[4] = {false, false, true,true};
+    assert(cddContainsBoolState(result.handle(), state2, bdd_start_level));
+    bool state3[4] = {false, false, false,true};
+    assert(!cddContainsBoolState(result.handle(), state3, bdd_start_level));
 
     result =  (!b6 & b7 & b8 & b9);
     print_cdd(result, "!b6b7b8b9", true);
+    bool state4[4] = {false, true, true,true};
+    assert(cddContainsBoolState(result.handle(), state4, bdd_start_level));
+    bool state5[4] = {false, false, false,true};
+    assert(!cddContainsBoolState(result.handle(), state5, bdd_start_level));
 
     result =  (!b6 & b7 & b8 & !b9);
     print_cdd(result, "!b6b7b8!b9", true);
 
+    bool state6[4] = {false, true, true,false};
+    assert(cddContainsBoolState(result.handle(), state6, bdd_start_level));
+    bool state7[4] = {false, false, false,true};
+    assert(!cddContainsBoolState(result.handle(), state7, bdd_start_level));
+
     result =  (b6 & b7 & !b8 & !b9);
     print_cdd(result, "b6b7!b8!b9", true);
+
+    bool state8[4] = {true, true, false,false};
+    assert(cddContainsBoolState(result.handle(), state8, bdd_start_level));
+    bool state9[4] = {false, false, false,true};
+    assert(!cddContainsBoolState(result.handle(), state9, bdd_start_level));
 
     result = (b6 & b7 & b8) | (!b6 & !b7 & !b8);
     print_cdd(result, "b6b7b8or!b6!b7!b8", true);
 
+
+    bool state10[3] = {true, true, true};
+    assert(cddContainsBoolState(result.handle(), state10, bdd_start_level));
+    bool state11[3] = {false, false, false};
+    assert(cddContainsBoolState(result.handle(), state11, bdd_start_level));
+
+
+    bool state12[3] = {true, true, false};
+    assert(!cddContainsBoolState(result.handle(), state12, bdd_start_level));
+    bool state13[3] = {false, false, true};
+    assert(!cddContainsBoolState(result.handle(), state13, bdd_start_level));
+
     result = (b6 & b7 & b8) | (!b6 & !b7 & b8);
     print_cdd(result, "b6b7b8or!b6!b7b8", true);
+
+
+    bool state14[3] = {true, true, true};
+    assert(cddContainsBoolState(result.handle(), state14, bdd_start_level));
+    bool state15[3] = {false, false, true};
+    assert(cddContainsBoolState(result.handle(), state15, bdd_start_level));
+
+    bool state16[3] = {true, true, false};
+    assert(!cddContainsBoolState(result.handle(), state16, bdd_start_level));
+    bool state17[3] = {false, false, false};
+    assert(!cddContainsBoolState(result.handle(), state17, bdd_start_level));
 
     result = (b6 & b7 & b8) | (!b6 & b7 & b8);
     print_cdd(result, "b6b7b8or!b6b7b8", true);
 
+    bool state18[3] = {true, true, true};
+    assert(cddContainsBoolState(result.handle(), state18, bdd_start_level));
+    bool state19[3] = {false, true, true};
+    assert(cddContainsBoolState(result.handle(), state19, bdd_start_level));
+
+    bool state20[3] = {true, true, false};
+    assert(!cddContainsBoolState(result.handle(), state20, bdd_start_level));
+    bool state21[3] = {false, false, false};
+    assert(!cddContainsBoolState(result.handle(), state21, bdd_start_level));
+
     result = (b6 & b7 & !b8) | (!b6 & b7 & !b8);
     print_cdd(result, "b6b7!b8or!b6b7!b8", true);
+
+    bool state22[3] = {true, true, false};
+    assert(cddContainsBoolState(result.handle(), state22, bdd_start_level));
+    bool state23[3] = {false, true, false};
+    assert(cddContainsBoolState(result.handle(), state23, bdd_start_level));
+
+    bool state24[3] = {true, false, false};
+    assert(!cddContainsBoolState(result.handle(), state24, bdd_start_level));
+    bool state25[3] = {false, false, false};
+    assert(!cddContainsBoolState(result.handle(), state25, bdd_start_level));
 
     return result;
 }
@@ -462,7 +579,19 @@ int main(int argc, char* argv[])
 
     cdd cdd_main = buildCDDWithBooleansTest(number_of_clocks+1, number_of_DBMs, number_of_booleans, bdd_start_level);
     // cdd_main = buildSimpleStaticBDD(bdd_start_level);
-     cdd_main = MartijnTest(bdd_start_level);
+    cdd_main = MartijnTest(bdd_start_level);
+
+    bool state[] = {true, true, true};
+    bool res = cddContainsBoolState(cdd_main.handle(), state, bdd_start_level);
+    printf("The inclusion check results in %i\n", res);
+
+    bool state1[] = {true, true, false};
+    res = cddContainsBoolState(cdd_main.handle(), state1, bdd_start_level);
+    printf("The inclusion check results in %i\n", res);
+
+    bool state2[] = {true,false,false};
+    bool res1 = cddContainsBoolState(cdd_main.handle(),state2, bdd_start_level);
+    printf("The inclusion check results in %i\n", res1);
    // print_cdd(cdd_main, "main");
 
     /*
