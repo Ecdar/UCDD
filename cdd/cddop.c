@@ -1145,8 +1145,13 @@ ddNode* cdd_extract_dbm(ddNode* cdd, raw_t* dbm, int32_t size)
 
     base_resetBits(touched, bits2intsize(size));
 
-    while (!cdd_isterminal(node)) {
+    while (!(cdd_isterminal(node) ) ) {
         info = cdd_info(node);
+        // TODO: Fix the BDDs here correctly
+        if (info->type == TYPE_BDD)
+            break;
+        printf("%i \n", info->type);
+        assert(info->type != TYPE_BDD);
 
         assert(info->clock1 < size);
         assert(info->clock2 < size);
@@ -1168,7 +1173,6 @@ ddNode* cdd_extract_dbm(ddNode* cdd, raw_t* dbm, int32_t size)
 
         node = cdd_it_child(it);
     }
-
     dbm_closex(dbm, size, touched);
     assert(dbm_isValid(dbm, size));
 
