@@ -82,6 +82,8 @@ void cdd2Dot(char* fname, ddNode* node, char* name);
 
 /*=== INTERNAL PROTOTYPES ==============================================*/
 static int32_t cdd_contains_rec(ddNode*, raw_t*, int32_t dim);
+static int32_t cdd_contains_metafed_rec(ddNode* node, raw_t* d, int32_t dim,  bool state[], int32_t bdd_start_level, int32_t index, bool negated);
+
 static ddNode* cdd_apply_rec(ddNode*, ddNode*, bool forced);
 #ifdef EX
 static ddNode* cdd_exist_rec(ddNode* node, int32_t*, int32_t*, raw_t*);
@@ -386,6 +388,89 @@ int32_t cdd_contains(ddNode* node, raw_t* dbm, int32_t dim)
     return cdd_contains_rec(node, dbm, dim);
 }
 
+int32_t cdd_contains_metafed(ddNode* node, raw_t* dbm, int32_t dim,  bool state[], int32_t bdd_start_level, int32_t index, bool negated)
+{
+    assert(dbm_isValid(dbm, dim));
+    return cdd_contains_metafed_rec(node, dbm, dim, state, bdd_start_level, index, negated);
+}
+
+
+static int32_t cdd_contains_metafed_rec(ddNode* node, raw_t* d, int32_t dim,  bool state[], int32_t bdd_start_level, int32_t index, bool negated)
+{
+    raw_t* tmp;
+    cdd_iterator it;
+    LevelInfo* info;
+
+    /* Check termination conditions */
+    if (node == cddtrue)
+        return 1;
+    if (node == cddfalse)
+        return 0;
+
+#ifdef MULTI_TERMINAL
+    if (cdd_is_extra_terminal(node)) {
+        return cdd_mask(node) ? 0 : 1;
+    }
+#endif
+
+    info = cdd_info(node);
+    switch (info->type) {
+        case TYPE_CDD:
+            /* If the DBM has a lower dimension than the CDD, then the DBM
+             * is a priori bigger than any CDD restricting these extra
+             * dimensions. Thus the CDD does not contain the DBM.
+             */
+            if (info->clock1 >= dim || info->clock2 >= dim) {
+                return 0;
+            }
+
+            /* Allocate space for copy */
+            tmp = malloc(dim * dim * sizeof(raw_t));
+            /* Iterate over children */
+            for (cdd_it_init(it, node); !cdd_it_atend(it); cdd_it_next(it)) {
+                if (!IS_TRUE(cdd_it_child(it))) {
+                    dbm_copy(tmp, d, dim);
+                    if (cdd_constrain2(tmp, dim, info->clock1, info->clock2, cdd_it_lower(it),
+                                       cdd_it_upper(it)) &&
+                        !cdd_contains_metafed_rec(cdd_it_child(it), tmp, dim,state, bdd_start_level, index+1, negated)) {
+                        free(tmp);
+                        return 0;
+                    }
+                }
+            }
+            free(tmp);
+            break;
+        case TYPE_BDD:
+
+
+            if (node->level!=index+bdd_start_level)
+                return (cdd_contains_metafed_rec(node, d, dim, state, bdd_start_level, index+1, negated));
+
+            if (bdd_node(node)->high==cddtrue) {
+                if (state[index]) return true ^ negated ^ cdd_is_negated(node);
+            }
+            if (bdd_node(node)->high==cddfalse) {
+                if (state[index]) return false ^ negated ^ cdd_is_negated(node);
+            }
+            if (bdd_node(node)->low==cddtrue) {
+                if (!state[index]) return true ^ negated ^ cdd_is_negated(node);
+            }
+            if (bdd_node(node)->low==cddfalse) {
+                if (!state[index]) return false ^ negated ^ cdd_is_negated(node);
+            }
+
+            if (state[index])
+                return cdd_contains_metafed_rec(bdd_node(node)->high, d, dim,  state, bdd_start_level, index+1, negated ^ cdd_is_negated(node));
+            else
+                return cdd_contains_metafed_rec(bdd_node(node)->low, d, dim,  state, bdd_start_level, index+1, negated ^ cdd_is_negated(node));
+            break;
+    }
+    return 1;
+}
+
+
+
+
 static int32_t cdd_contains_rec(ddNode* node, raw_t* d, int32_t dim)
 {
     raw_t* tmp;
@@ -432,9 +517,15 @@ static int32_t cdd_contains_rec(ddNode* node, raw_t* d, int32_t dim)
         free(tmp);
         break;
     case TYPE_BDD:
+        /*
         if (!cdd_contains_rec(bdd_node(node)->low, d, dim))
             return 0;
         if (!cdd_contains_rec(bdd_node(node)->high, d, dim))
+            return 0;
+            */
+        if (cdd_contains_rec(bdd_node(node)->low, d, dim) | cdd_contains_rec(bdd_node(node)->high, d, dim))
+            return 1;
+        else
             return 0;
         break;
     }
@@ -927,6 +1018,60 @@ ddNode* cdd_replace(ddNode* node, int32_t* levels, int32_t* clocks)
     return cdd_replace_rec(node, levels, clocks);
 }
 
+
+
+ddNode* cdd_restrict_rec(ddNode* node, int32_t* bdd_var_level, int32_t* assignment) {
+
+    if (cdd_isterminal(node))
+        return node;
+
+    // TODO: currently only supported for pure BDDs
+    assert(cdd_info(node)->type==TYPE_BDD);
+    bddNode* bdd_node = bdd_node(node);
+    printf("node level: %i, target_level: %i \n", bdd_node->level, bdd_var_level);
+
+
+    if (bdd_node->level > bdd_var_level)
+        return node;
+    else if (bdd_node->level < bdd_var_level) {
+
+        ddNode* res;
+        ddNode* tmp1;
+        ddNode* tmp2;
+        ddNode* tmp3;
+        tmp1 = cdd_bddvar(bdd_node->level);
+        cdd_ref(tmp1);
+        tmp2 = cdd_restrict_rec(bdd_node->low, bdd_var_level, assignment);
+        cdd_ref(tmp2);
+        tmp3 = cdd_restrict_rec(bdd_node->high, bdd_var_level, assignment);
+        cdd_ref(tmp3);
+        res = cdd_ite(tmp1, tmp3, tmp2);
+        cdd_ref(res);
+        cdd_rec_deref(tmp1);
+        cdd_rec_deref(tmp2);
+        cdd_rec_deref(tmp3);
+        cdd_deref(res);
+        return res;
+    }
+    else if( bdd_node->level == bdd_var_level) {
+        if (assignment == 0)
+            return cdd_restrict_rec(bdd_node->low, bdd_var_level, assignment);
+        else
+            return cdd_restrict_rec(bdd_node->high, bdd_var_level, assignment);
+    }
+    assert(false);
+    return node;
+
+}
+
+ddNode* cdd_restrict(ddNode* node, int32_t* bdd_var_level, int32_t* assignment) {
+    return cdd_restrict_rec(node, bdd_var_level, assignment);
+
+}
+
+
+
+
 static ddNode* cdd_replace_rec(ddNode* node, int32_t* levels, int32_t* clocks)
 {
     CddCacheData* entry;
@@ -1136,8 +1281,6 @@ ddNode* cdd_extract_dbm(ddNode* cdd, raw_t* dbm, int32_t size)
     ddNode *node, *zone, *result;
     uint32_t touched[bits2intsize(size)];
 
-    // cdd_printdot(cdd);
-
     node = cdd;
 
     dbm_init(dbm, size);
@@ -1148,9 +1291,9 @@ ddNode* cdd_extract_dbm(ddNode* cdd, raw_t* dbm, int32_t size)
     while (!(cdd_isterminal(node) ) ) {
         info = cdd_info(node);
         // TODO: Fix the BDDs here correctly
-        if (info->type == TYPE_BDD)
+        if (info->type == TYPE_BDD) {
             break;
-        printf("%i \n", info->type);
+        }
         assert(info->type != TYPE_BDD);
 
         assert(info->clock1 < size);
@@ -1163,17 +1306,15 @@ ddNode* cdd_extract_dbm(ddNode* cdd, raw_t* dbm, int32_t size)
 
         assert(cdd_it_child(it) != cddfalse);
 
-        /*printf("%d %d %d %d\n",
-               info->clock1, info->clock2,
-               bnd_l2u(cdd_it_lower(it)), cdd_it_upper(it));*/
+        if (info->type != TYPE_BDD) {
+            dbm_constrain(dbm, size, info->clock2, info->clock1, bnd_l2u(cdd_it_lower(it)), touched);
 
-        dbm_constrain(dbm, size, info->clock2, info->clock1, bnd_l2u(cdd_it_lower(it)), touched);
-
-        dbm_constrain(dbm, size, info->clock1, info->clock2, cdd_it_upper(it), touched);
-
+            dbm_constrain(dbm, size, info->clock1, info->clock2, cdd_it_upper(it), touched);
+        }
         node = cdd_it_child(it);
     }
     dbm_closex(dbm, size, touched);
+
     assert(dbm_isValid(dbm, size));
 
     zone = cdd_from_dbm(dbm, size);
@@ -1472,6 +1613,7 @@ ddNode* cdd_reduce(ddNode* node)
 
     cdd_tarjan_init(&graph, cdd_clocknum, dist, count, edges, fifo, queued);
     return cdd_tarjan_reduce_rec(node, &graph);
+
 }
 
 ///////////////////////////////////////////////////////////////////////////

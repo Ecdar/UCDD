@@ -543,6 +543,11 @@ extern ddNode* cdd_exist(ddNode*, int32_t*, int32_t*);
 extern ddNode* cdd_replace(ddNode*, int32_t*, int32_t*);
 
 /**
+ * Restricts the boolean variable at the given level in the BDD according to the provided value
+ */
+extern ddNode* cdd_restrict(ddNode* node, int32_t* bdd_var_level, int32_t* assignment);
+
+/**
  * If then else operation. @todo
  */
 extern ddNode* cdd_ite(ddNode*, ddNode*, ddNode*);
@@ -566,6 +571,17 @@ extern ddNode* cdd_reduce2(ddNode*);
  */
 extern int32_t cdd_contains(ddNode* cdd, raw_t* dbm, int32_t dim);
 
+
+/**
+ * Returns true if \a metafederaion is included in a CBDD.
+ * @param cdd a cbdd
+ * @param dbm a dbm
+ * @param dbm a boolean state
+ * @return true if \a dbm is included in \a cdd
+ */
+
+extern int32_t cdd_contains_metafed(ddNode* node, raw_t* dbm, int32_t dim,  bool state[], int32_t bdd_start_level, int32_t index, bool negated);
+
 /**
  * Convert a DBM to a CDD. It is important that the indexes of the DBM
  * correspond to clocks in the CDD library.
@@ -578,6 +594,7 @@ extern ddNode* cdd_from_dbm(const raw_t* dbm, int32_t dim);
  * Extract a zone from a CDD.  This function will extract a zone from
  * \a cdd and write it to \a dbm.  It will return a CDD equivalent to
  * \a cdd \ \c cdd_from_dbm(dbm).
+ * PRECONDITION: call CDD reduce first!!!
  * @param cdd a cdd
  * @param dbm a dbm
  * @return the difference between \a cdd and \a dbm
@@ -819,6 +836,7 @@ private:
     friend cdd cdd_bddnvarpp(int);
     friend cdd cdd_exist(const cdd&, int32_t*, int32_t*);
     friend cdd cdd_replace(const cdd&, int32_t*, int32_t*);
+    friend cdd cdd_restrict(const cdd&, int32_t*, int32_t*);
     friend int32_t cdd_nodecount(const cdd&);
     friend cdd cdd_apply(const cdd&, const cdd&, int);
     friend cdd cdd_apply_reduce(const cdd&, const cdd&, int);
@@ -826,6 +844,7 @@ private:
     friend cdd cdd_reduce(const cdd&);
     friend cdd cdd_reduce2(const cdd&);
     friend bool cdd_contains(const cdd&, raw_t* dbm, int32_t dim);
+    friend bool  cdd_contains_metafed(const cdd& c, raw_t* dbm, int32_t dim,  bool state[], int32_t bdd_start_level, int32_t index, bool negated);
     friend cdd cdd_extract_dbm(const cdd&, raw_t* dbm, int32_t dim);
     friend void cdd_fprintdot(FILE* ofile, const cdd&, bool push_negate);
     friend void cdd_printdot(const cdd&, bool push_negate);
@@ -852,6 +871,19 @@ private:
 inline bool cdd_contains(const cdd& c, raw_t* dbm, int32_t dim)
 {
     return cdd_contains(c.root, dbm, dim);
+}
+
+
+/**
+ * Returns true if \a metafederaion is included in a CBDD.
+ * @param cdd a cbdd
+ * @param dbm a dbm
+ * @param dbm a boolean state
+ * @return true if \a dbm is included in \a cdd
+ */
+inline bool  cdd_contains_metafed(const cdd& c, raw_t* dbm, int32_t dim,  bool state[], int32_t bdd_start_level, int32_t index, bool negated)
+{
+    return cdd_contains_metafed(c, dbm, dim, state, bdd_start_level, index, negated);
 }
 
 /**
@@ -943,6 +975,16 @@ inline cdd cdd_exist(const cdd& r, int32_t* levels, int32_t* clocks)
 {
     return cdd(cdd_exist(r.root, levels, clocks));
 }
+
+/**
+ * Restricts the boolean variable at the given level in the BDD according to the provided value
+ */
+inline cdd cdd_restrict(const cdd& r, int32_t* bdd_var_level, int32_t* assignment)
+{
+
+    return cdd(cdd_restrict(r.root, bdd_var_level, assignment));
+}
+
 
 /**
  * Variable substitution.
