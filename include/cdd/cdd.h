@@ -602,6 +602,18 @@ extern ddNode* cdd_from_dbm(const raw_t* dbm, int32_t dim);
 extern ddNode* cdd_extract_dbm(ddNode* cdd, raw_t* dbm, int32_t dim);
 
 /**
+ * Extract a zone from a CDD.  This function will extract a zone from
+ * \a cdd and write it to \a dbm.  It will return a CDD equivalent to
+ * \a cdd \ \c cdd_from_dbm(dbm). Will store the final bdd in returned_bdd
+ * PRECONDITION: call CDD reduce first!!!
+ * @param cdd a cdd
+ * @param dbm a dbm
+ * @return the difference between \a cdd and \a dbm
+ */
+extern ddNode* cdd_extract_dbm_and_bdd(ddNode* cdd, raw_t* dbm, int32_t dim, ddNode** returned_bdd);
+
+
+/**
  * Print a CDD \a r as a dot input file \a ofile. You can use the dot
  * program from the graphwiz package to convert this to a PS picture
  * of the CDD.
@@ -846,6 +858,7 @@ private:
     friend bool cdd_contains(const cdd&, raw_t* dbm, int32_t dim);
     friend bool  cdd_contains_metafed(const cdd& c, raw_t* dbm, int32_t dim,  bool state[], int32_t bdd_start_level, int32_t index, bool negated);
     friend cdd cdd_extract_dbm(const cdd&, raw_t* dbm, int32_t dim);
+    friend cdd cdd_extract_dbm_and_bdd(const cdd&, raw_t* dbm, int32_t dim, cdd**);
     friend void cdd_fprintdot(FILE* ofile, const cdd&, bool push_negate);
     friend void cdd_printdot(const cdd&, bool push_negate);
     friend void cdd_fprint_code(FILE* ofile, const cdd&, cdd_print_varloc_f printer1,
@@ -1054,6 +1067,28 @@ inline cdd cdd_reduce2(const cdd& r) { return cdd(cdd_reduce2(r.root)); }
 inline cdd cdd_extract_dbm(const cdd& r, raw_t* dbm, int32_t dim)
 {
     return cdd(cdd_extract_dbm(r.root, dbm, dim));
+}
+
+/**
+ * Extract a zone from a CDD.  This function will extract a zone from
+ * \a cdd and write it to \a dbm.  It will return a CDD equivalent to
+ * \a cdd \ \c cdd_from_dbm(dbm).
+ * @param cdd a cdd
+ * @param dbm a dbm
+ * @return the difference between \a cdd and \a dbm
+ */
+inline cdd cdd_extract_dbm_and_bdd(const cdd& r, raw_t* dbm, int32_t dim, cdd** ret)
+{
+    ddNode** returned ;
+    printf("%p\n",*returned);
+    cdd result = cdd(cdd_extract_dbm_and_bdd(r.root, dbm, dim, returned));
+    printf("%p\n",*returned);
+
+    cdd c = cdd(*returned);
+    assert(c.root==*returned);
+    printf("c: %p\n",c.root);
+    *ret = &c;
+    return result;
 }
 
 /**

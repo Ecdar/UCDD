@@ -1326,6 +1326,66 @@ ddNode* cdd_extract_dbm(ddNode* cdd, raw_t* dbm, int32_t size)
     return result;
 }
 
+
+ddNode* cdd_extract_dbm_and_bdd(ddNode* cdd, raw_t* dbm, int32_t size, ddNode** returned_bdd)
+{
+    cdd_iterator it;
+    LevelInfo* info;
+    ddNode *node, *zone, *result;
+    uint32_t touched[bits2intsize(size)];
+
+    node = cdd;
+
+    dbm_init(dbm, size);
+    // dbm_print(stdout, dbm, size);
+
+    base_resetBits(touched, bits2intsize(size));
+
+    while (!(cdd_isterminal(node) ) ) {
+        info = cdd_info(node);
+        // TODO: Fix the BDDs here correctly
+        if (info->type == TYPE_BDD) {
+            printf("%p : %p\n",node, cddfalse);
+            *returned_bdd = node;
+            break;
+        }
+        assert(info->type != TYPE_BDD);
+
+        assert(info->clock1 < size);
+        assert(info->clock2 < size);
+
+        cdd_it_init(it, node);
+        if (IS_FALSE(cdd_it_child(it))) {
+            cdd_it_next(it);
+        }
+
+        assert(cdd_it_child(it) != cddfalse);
+
+        if (info->type != TYPE_BDD) {
+            dbm_constrain(dbm, size, info->clock2, info->clock1, bnd_l2u(cdd_it_lower(it)), touched);
+
+            dbm_constrain(dbm, size, info->clock1, info->clock2, cdd_it_upper(it), touched);
+        }
+        node = cdd_it_child(it);
+    }
+    dbm_closex(dbm, size, touched);
+
+    assert(dbm_isValid(dbm, size));
+
+    zone = cdd_from_dbm(dbm, size);
+    cdd_ref(zone);
+
+    result = cdd_and(cdd, cdd_neg(zone));
+    cdd_deref(zone);
+    *returned_bdd = node;
+    return result;
+}
+
+
+
+
+
+
 void cdd_mark_clock(int32_t* vec, int32_t c)
 {
     int32_t n;

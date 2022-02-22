@@ -586,6 +586,8 @@ static void extractDBMWithBoolsTest(size_t size, int number_of_DBMs, int bdd_sta
     assert(cdd_reduce(cdd_result  ^ rebuilt) == cdd_false());
 }
 
+
+
 static void containsDBMTest(size_t size, int number_of_DBMs) {
     printf("Running containsDBMTest.\n");
     cdd cdd_result = cdd_false();
@@ -720,7 +722,7 @@ bool cddFromIntervalTest()
     assert(cdd_reduce(smaller - larger) == cdd_false() );
 }
 
-bool orOfBCDDTest(int32_t bdd_start_level)
+bool orOfBCDDTest(size_t size,  int32_t bdd_start_level)
 {
     // note that 5 means 2 including, while the 10 below means 5 non including
     cdd b6 = cdd_bddvarpp(bdd_start_level + 0);
@@ -734,10 +736,47 @@ bool orOfBCDDTest(int32_t bdd_start_level)
     cdd result = larger | smaller;
     cdd_reduce(result);
     print_cdd(result,"orOfBCDD",true);
-
+    return true;
     //TODO: Figure out good assert
 }
 
+
+bool orExactractWithBddTest(size_t size, int32_t bdd_start_level)
+{
+    // note that 5 means 2 including, while the 10 below means 5 non including
+    cdd b6 = cdd_bddvarpp(bdd_start_level + 0);
+
+    cdd smaller = cdd_interval(1,0,0,5);
+    smaller &= b6;
+    print_cdd(smaller,"smaller",true);
+    cdd larger = cdd_interval(1,0,6,10);
+    larger &= !b6;
+    print_cdd(larger,"larger",true);
+    cdd result = larger | smaller;
+    cdd_reduce(result);
+    print_cdd(result,"orOfBCDD",true);
+    cdd** cdd_at_bottom;
+    ADBM(dbm);
+
+    cdd extract = cdd_extract_dbm_and_bdd(result,dbm, size,cdd_at_bottom);
+    cdd* pointer = *cdd_at_bottom;
+
+    cdd test = cdd(pointer->handle());
+    extract = cdd_reduce(extract);
+    cdd removed = cdd(dbm, size);
+    removed = cdd_reduce(removed);
+
+    //cdd res = cdd_reduce(*pointer);
+    print_cdd(extract,"extract1", true);
+    print_cdd(removed,"removed", true);
+    pointer->handle();
+
+
+    print_cdd(test,"cdd_at_bottom", true);
+
+    return true;
+    //TODO: Figure out good assert
+}
 
 void restrictTest( int32_t number_of_booleans, int32_t bdd_start_level)
 {
@@ -873,6 +912,10 @@ int main(int argc, char* argv[])
     cdd_add_clocks(number_of_clocks_including_zero);
     int bdd_start_level = cdd_add_bddvar(number_of_booleans);
 
+    orOfBCDDTest(number_of_clocks_including_zero, bdd_start_level);
+    orExactractWithBddTest(number_of_clocks_including_zero,bdd_start_level);
+
+/*
     cdd cdd_main = test1_CDD_from_random_DBMs(number_of_clocks_including_zero, number_of_DBMs);
 
     containsDBMTest(number_of_clocks_including_zero,number_of_DBMs);
@@ -881,14 +924,15 @@ int main(int argc, char* argv[])
     equalityTest(number_of_clocks_including_zero,number_of_DBMs);
     negationTest(number_of_clocks_including_zero,number_of_DBMs);
     extractDBMTest(number_of_clocks_including_zero,number_of_DBMs);
+    orExactractWithBddTest(number_of_clocks_including_zero,number_of_DBMs);
     extractDBMWithBoolsTest(number_of_clocks_including_zero,number_of_DBMs, bdd_start_level);
     cddFromIntervalTest();
-    restrictTest(  number_of_booleans,  bdd_start_level);
     orOfBCDDTest(bdd_start_level);
+    restrictTest(  number_of_booleans,  bdd_start_level);
     cdd_main = buildCDDWithBooleansTest(number_of_clocks+1, number_of_DBMs, number_of_booleans, bdd_start_level);
     cdd_main = buildSimpleStaticBDD(bdd_start_level);
     cdd_main = MartijnTest(bdd_start_level);
-
+*/
     cdd_done();
     exit(0);
 }
