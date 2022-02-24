@@ -332,6 +332,12 @@ extern int32_t cdd_get_number_of_tautologies();
 extern int32_t cdd_get_level_count();
 
 /**
+ * checks for equivalence between two cdds
+ */
+extern  int32_t cdd_equiv(ddNode* c, ddNode* d);
+
+
+/**
  * Returns the number of BDD levels.
  */
 extern int32_t cdd_get_bdd_level_count();
@@ -610,7 +616,7 @@ extern ddNode* cdd_extract_dbm(ddNode* cdd, raw_t* dbm, int32_t dim);
  * @param dbm a dbm
  * @return the difference between \a cdd and \a dbm
  */
-extern ddNode* cdd_extract_dbm_and_bdd(ddNode* cdd, raw_t* dbm, int32_t dim, ddNode** returned_bdd);
+extern ddNode* cdd_extract_dbm_and_bdd(ddNode* cdd, raw_t* dbm, int32_t dim, ddNode** returned_bdd, bool extract_BDD);
 
 
 /**
@@ -854,11 +860,12 @@ private:
     friend cdd cdd_apply_reduce(const cdd&, const cdd&, int);
     friend cdd cdd_ite(const cdd&, const cdd&, const cdd&);
     friend cdd cdd_reduce(const cdd&);
+    friend bool cdd_equiv(const cdd&, const cdd&);
     friend cdd cdd_reduce2(const cdd&);
     friend bool cdd_contains(const cdd&, raw_t* dbm, int32_t dim);
     friend bool  cdd_contains_metafed(const cdd& c, raw_t* dbm, int32_t dim,  bool state[], int32_t bdd_start_level, int32_t index, bool negated);
     friend cdd cdd_extract_dbm(const cdd&, raw_t* dbm, int32_t dim);
-    friend cdd cdd_extract_dbm_and_bdd(const cdd&, raw_t* dbm, int32_t dim, cdd**);
+    friend cdd cdd_extract_dbm_and_bdd(const cdd&, raw_t* dbm, int32_t dim, cdd&);
     friend void cdd_fprintdot(FILE* ofile, const cdd&, bool push_negate);
     friend void cdd_printdot(const cdd&, bool push_negate);
     friend void cdd_fprint_code(FILE* ofile, const cdd&, cdd_print_varloc_f printer1,
@@ -935,6 +942,16 @@ inline cdd cdd_lowerpp(int32_t i, int32_t j, raw_t bound)
 {
     return cdd(cdd_neg(cdd_upper(i, j, bound)));
 }
+
+
+/**
+ * checks for equivalence between two cdds
+ */
+inline bool  cdd_equiv(const cdd& l, const cdd& r)
+{
+    return cdd_equiv(l.root,r.root);
+}
+
 
 /**
  * Creates a new CDD node corresponding to the constraint \a lower
@@ -1077,17 +1094,16 @@ inline cdd cdd_extract_dbm(const cdd& r, raw_t* dbm, int32_t dim)
  * @param dbm a dbm
  * @return the difference between \a cdd and \a dbm
  */
-inline cdd cdd_extract_dbm_and_bdd(const cdd& r, raw_t* dbm, int32_t dim, cdd** ret)
+inline cdd cdd_extract_dbm_and_bdd(const cdd& r, raw_t* dbm, int32_t dim, cdd &ret)
 {
     ddNode** returned ;
-    printf("%p\n",*returned);
-    cdd result = cdd(cdd_extract_dbm_and_bdd(r.root, dbm, dim, returned));
-    printf("%p\n",*returned);
+    cdd result = cdd(cdd_extract_dbm_and_bdd(r.root, dbm, dim, returned,true));
 
     cdd c = cdd(*returned);
+
     assert(c.root==*returned);
-    printf("c: %p\n",c.root);
-    *ret = &c;
+
+    ret = c;
     return result;
 }
 

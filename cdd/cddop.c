@@ -1276,6 +1276,11 @@ ddNode* cdd_from_dbm(const raw_t* dbm, int32_t size)
 
 ddNode* cdd_extract_dbm(ddNode* cdd, raw_t* dbm, int32_t size)
 {
+
+    ddNode** returned_bdd;
+    ddNode* result = cdd_extract_dbm_and_bdd(cdd, dbm, size, returned_bdd, false);
+    return result;
+/*
     cdd_iterator it;
     LevelInfo* info;
     ddNode *node, *zone, *result;
@@ -1324,10 +1329,11 @@ ddNode* cdd_extract_dbm(ddNode* cdd, raw_t* dbm, int32_t size)
     cdd_deref(zone);
 
     return result;
+*/
 }
 
 
-ddNode* cdd_extract_dbm_and_bdd(ddNode* cdd, raw_t* dbm, int32_t size, ddNode** returned_bdd)
+ddNode* cdd_extract_dbm_and_bdd(ddNode* cdd, raw_t* dbm, int32_t size, ddNode** returned_bdd, bool extract_bdd)
 {
     cdd_iterator it;
     LevelInfo* info;
@@ -1345,8 +1351,8 @@ ddNode* cdd_extract_dbm_and_bdd(ddNode* cdd, raw_t* dbm, int32_t size, ddNode** 
         info = cdd_info(node);
         // TODO: Fix the BDDs here correctly
         if (info->type == TYPE_BDD) {
-            printf("%p : %p\n",node, cddfalse);
-            *returned_bdd = node;
+            if (extract_bdd)
+                *returned_bdd = node;
             break;
         }
         assert(info->type != TYPE_BDD);
@@ -1377,7 +1383,9 @@ ddNode* cdd_extract_dbm_and_bdd(ddNode* cdd, raw_t* dbm, int32_t size, ddNode** 
 
     result = cdd_and(cdd, cdd_neg(zone));
     cdd_deref(zone);
-    *returned_bdd = node;
+
+    if (extract_bdd)
+        *returned_bdd = node;
     return result;
 }
 
@@ -1425,7 +1433,7 @@ static ddNode* add_bound(ddNode* c, int32_t level, raw_t low, raw_t up)
     return tmp2;
 }
 
-static int32_t equiv(ddNode* c, ddNode* d)
+ int32_t cdd_equiv(ddNode* c, ddNode* d)
 {
     ddNode* tmp1;
     ddNode* tmp2;
@@ -1489,7 +1497,7 @@ static ddNode* cdd_reduce2_rec(ddNode* node)
             cdd_ref(join);
 
             /* Are they equivalent ? */
-            if (equiv(split, join)) {
+            if (cdd_equiv(split, join)) {
                 /* Yes, use the union as the new prev */
                 cdd_rec_deref(prev);
                 prev = tmp1;
