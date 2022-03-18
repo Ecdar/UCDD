@@ -559,11 +559,6 @@ extern ddNode* cdd_exist(ddNode*, int32_t*, int32_t*);
 extern ddNode* cdd_replace(ddNode*, int32_t*, int32_t*);
 
 /**
- * Restricts the boolean variable at the given level in the BDD according to the provided value
- */
-extern ddNode* cdd_restrict(ddNode* node, int32_t bdd_var_level, int32_t assignment);
-
-/**
  * If then else operation. @todo
  */
 extern ddNode* cdd_ite(ddNode*, ddNode*, ddNode*);
@@ -631,16 +626,6 @@ extern ddNode* cdd_extract_bdd(ddNode* cdd, raw_t* dbm, int32_t dim);
 
 
 
-/**
- * Extract a zone from a CDD.  This function will extract a zone from
- * \a cdd and write it to \a dbm.  It will return a CDD equivalent to
- * \a cdd \ \c cdd_from_dbm(dbm). Will store the final bdd in returned_bdd
- * PRECONDITION: call CDD reduce first!!!
- * @param cdd a cdd
- * @param dbm a dbm
- * @return the difference between \a cdd and \a dbm
- */
-extern ddNode* cdd_extract_dbm_and_bdd(ddNode* cdd, raw_t* dbm, int32_t dim, ddNode** returned_bdd, bool extract_BDD);
 
 
 /**
@@ -880,7 +865,6 @@ private:
 
     friend cdd cdd_exist(const cdd&, int32_t*, int32_t*);
     friend cdd cdd_replace(const cdd&, int32_t*, int32_t*);
-    friend cdd cdd_restrict(const cdd&, int32_t, int32_t);
     friend int32_t cdd_nodecount(const cdd&);
     friend cdd cdd_apply(const cdd&, const cdd&, int);
     friend cdd cdd_apply_reduce(const cdd&, const cdd&, int);
@@ -892,7 +876,6 @@ private:
     friend bool  cdd_contains_metafed(const cdd& c, raw_t* dbm, int32_t dim,  bool state[], int32_t bdd_start_level, int32_t index, bool negated);
     friend cdd cdd_extract_dbm(const cdd&, raw_t* dbm, int32_t dim);
     friend cdd cdd_extract_bdd(const cdd&, raw_t* dbm, int32_t dim);
-    friend cdd cdd_extract_dbm_and_bdd(const cdd&, raw_t* dbm, int32_t dim, cdd&);
     friend void cdd_fprintdot(FILE* ofile, const cdd&, bool push_negate);
     friend void cdd_printdot(const cdd&, bool push_negate);
     friend void cdd_fprint_code(FILE* ofile, const cdd&, cdd_print_varloc_f printer1,
@@ -1045,15 +1028,6 @@ inline cdd cdd_exist(const cdd& r, int32_t* levels, int32_t* clocks)
     return cdd(cdd_exist(r.root, levels, clocks));
 }
 
-/**
- * Restricts the boolean variable at the given level in the BDD according to the provided value
- */
-inline cdd cdd_restrict(const cdd& r, int32_t bdd_var_level, int32_t assignment)
-{
-
-    return cdd(cdd_restrict(r.root, bdd_var_level, assignment));
-}
-
 
 /**
  * Variable substitution.
@@ -1138,26 +1112,6 @@ inline cdd cdd_extract_bdd(const cdd& r, raw_t* dbm, int32_t dim)
 }
 
 
-/**
- * Extract a zone from a CDD.  This function will extract a zone from
- * \a cdd and write it to \a dbm.  It will return a CDD equivalent to
- * \a cdd \ \c cdd_from_dbm(dbm).
- * @param cdd a cdd
- * @param dbm a dbm
- * @return the difference between \a cdd and \a dbm
- */
-inline cdd cdd_extract_dbm_and_bdd(const cdd& r, raw_t* dbm, int32_t dim, cdd &ret)
-{
-    ddNode** returned ;
-    cdd result = cdd(cdd_extract_dbm_and_bdd(r.root, dbm, dim, returned,true));
-
-    cdd c = cdd(*returned);
-
-    assert(c.root==*returned);
-
-    ret = c;
-    return result;
-}
 
 /**
  * Print a CDD \a r as a dot input file \a ofile. You can use the dot
