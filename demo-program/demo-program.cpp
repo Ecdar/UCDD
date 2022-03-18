@@ -80,7 +80,7 @@ uint32_t printCounter = 0; // Used to number printed CDDs
 
 typedef void (*TestFunction)(size_t size);
 
-static void print_cdd(cdd to_print, char* name, bool push_negate) {
+static void print_cdd(cdd to_print, char *name, bool push_negate) {
     char filename[30];
     sprintf(filename, "%s_%d.dot", name, printCounter);
     printf("Printing cdd %s to file : \n", name);
@@ -93,13 +93,12 @@ static void print_cdd(cdd to_print, char* name, bool push_negate) {
 }
 
 static void print_cdd(cdd to_print, bool push_negate) {
-    print_cdd(to_print, "",push_negate);
+    print_cdd(to_print, "", push_negate);
 }
 
 /* test conversion between CDD and DBMs
  */
-static void test_conversion(size_t size)
-{
+static void test_conversion(size_t size) {
     ADBM(dbm1);
     ADBM(dbm2);
 
@@ -124,8 +123,7 @@ static void test_conversion(size_t size)
 
 /* test intersection of CDDs
  */
-static void test_intersection(size_t size)
-{
+static void test_intersection(size_t size) {
     cdd cdd1, cdd2, cdd3, cdd4;
     ADBM(dbm1);
     ADBM(dbm2);
@@ -167,8 +165,7 @@ static void test_intersection(size_t size)
 static double time_apply_and_reduce = 0;
 static double time_apply_reduce = 0;
 
-static void test_apply_reduce(size_t size)
-{
+static void test_apply_reduce(size_t size) {
     /* Generate 8 simple CDDs and then 'or' them together in a pair
      * wise/binary tree fashion.
      */
@@ -218,8 +215,7 @@ static void test_apply_reduce(size_t size)
 static double time_reduce = 0;
 static double time_bf = 0;
 
-static void test(const char* name, TestFunction f, size_t size)
-{
+static void test(const char *name, TestFunction f, size_t size) {
     cout << name << " size = " << size << endl;
     for (uint32_t k = 0; k < LOOP; ++k) {
         PROGRESS();
@@ -228,8 +224,7 @@ static void test(const char* name, TestFunction f, size_t size)
 }
 
 
-static cdd randomCddFromDBMs(size_t size, int number_of_DBMs)
-{
+static cdd randomCddFromDBMs(size_t size, int number_of_DBMs) {
     cdd cdd_result = cdd_false();
     ADBM(dbm);
     for (int i = 0; i < number_of_DBMs; i++) {
@@ -242,8 +237,7 @@ static cdd randomCddFromDBMs(size_t size, int number_of_DBMs)
 }
 
 
-static void test_reduce(size_t size)
-{
+static void test_reduce(size_t size) {
     cdd cdd1, cdd_bf, cdd_tarjan, cdd_reduce_2;
     ADBM(dbm);
 
@@ -257,30 +251,30 @@ static void test_reduce(size_t size)
     cdd_tarjan = cdd_reduce(cdd1);
     cdd_reduce_2 = cdd_reduce2(cdd1);
 
-    printf("cdd_bf == cdd1: %i\n",(cdd_bf == cdd1));
-    printf("cdd_bf == cdd_tarjan: %i\n",(cdd_bf == cdd_tarjan));
-    printf("cdd_bf == cdd_reduce_2: %i\n",(cdd_bf == cdd_reduce_2));
-    printf("cdd_bf == cdd_bf: %i\n",(cdd_bf == cdd_bf));
+    printf("cdd_bf == cdd1: %i\n", (cdd_bf == cdd1));
+    printf("cdd_bf == cdd_tarjan: %i\n", (cdd_bf == cdd_tarjan));
+    printf("cdd_bf == cdd_reduce_2: %i\n", (cdd_bf == cdd_reduce_2));
+    printf("cdd_bf == cdd_bf: %i\n", (cdd_bf == cdd_bf));
 
     printf("---\n");
 
-    printf("(!cdd_bf & cdd1) == cdd_false()) && ((cdd_bf & !cdd1) == cdd_false()): %i\n",((!cdd_bf & cdd1) == cdd_false()) && ((cdd_bf & !cdd1) == cdd_false()));
-    printf("(!cdd_bf & cdd_tarjan) == cdd_false()) && ((cdd_bf & !cdd_tarjan) == cdd_false()): %i\n",((!cdd_bf & cdd_tarjan) == cdd_false()) && ((cdd_bf & !cdd_tarjan) == cdd_false()));
-    printf("(!cdd_bf & cdd_reduce_2) == cdd_false()) && ((cdd_bf & !cdd_reduce_2) == cdd_false()): %i\n",((!cdd_bf & cdd_reduce_2) == cdd_false()) && ((cdd_bf & !cdd_reduce_2) == cdd_false()));
-
-    printf("---\n");
-
-
-
-    printf("cdd_reduce(cdd_bf ^ cdd1) == cdd_false(): %i\n",(cdd_reduce(cdd_bf ^ cdd1) == cdd_false()));
-    printf("cdd_reduce(cdd_bf ^ cdd_tarjan) == cdd_false(): %i\n",(cdd_reduce(cdd_bf ^ cdd_tarjan) == cdd_false()));
-    printf("cdd_reduce(cdd_bf ^ cdd_reduce_2) == cdd_false(): %i\n",(cdd_reduce(cdd_bf ^ cdd_reduce_2) == cdd_false()));
-    printf("cdd_reduce(cdd_bf ^ cdd_bf) == cdd_false(): %i\n",(cdd_reduce(cdd_bf ^ cdd_bf) == cdd_false()));
+    printf("(!cdd_bf & cdd1) == cdd_false()) && ((cdd_bf & !cdd1) == cdd_false()): %i\n",
+           ((!cdd_bf & cdd1) == cdd_false()) && ((cdd_bf & !cdd1) == cdd_false()));
+    printf("(!cdd_bf & cdd_tarjan) == cdd_false()) && ((cdd_bf & !cdd_tarjan) == cdd_false()): %i\n",
+           ((!cdd_bf & cdd_tarjan) == cdd_false()) && ((cdd_bf & !cdd_tarjan) == cdd_false()));
+    printf("(!cdd_bf & cdd_reduce_2) == cdd_false()) && ((cdd_bf & !cdd_reduce_2) == cdd_false()): %i\n",
+           ((!cdd_bf & cdd_reduce_2) == cdd_false()) && ((cdd_bf & !cdd_reduce_2) == cdd_false()));
 
     printf("---\n");
 
 
+    printf("cdd_reduce(cdd_bf ^ cdd1) == cdd_false(): %i\n", (cdd_reduce(cdd_bf ^ cdd1) == cdd_false()));
+    printf("cdd_reduce(cdd_bf ^ cdd_tarjan) == cdd_false(): %i\n", (cdd_reduce(cdd_bf ^ cdd_tarjan) == cdd_false()));
+    printf("cdd_reduce(cdd_bf ^ cdd_reduce_2) == cdd_false(): %i\n",
+           (cdd_reduce(cdd_bf ^ cdd_reduce_2) == cdd_false()));
+    printf("cdd_reduce(cdd_bf ^ cdd_bf) == cdd_false(): %i\n", (cdd_reduce(cdd_bf ^ cdd_bf) == cdd_false()));
 
+    printf("---\n");
 
 
     assert(((cdd_bf ^ cdd1) == cdd_false()) == false);
@@ -288,21 +282,20 @@ static void test_reduce(size_t size)
     assert(((cdd_bf ^ cdd_reduce_2) == cdd_false()) == false);
     assert(((cdd_bf ^ cdd_bf) == cdd_false()) == true);
 
-    assert(((cdd_tarjan ^ cdd1) == cdd_false())  == false);
+    assert(((cdd_tarjan ^ cdd1) == cdd_false()) == false);
     assert(((cdd_tarjan ^ cdd_tarjan) == cdd_false()) == true);
     assert(((cdd_tarjan ^ cdd_reduce_2) == cdd_false()) == false);
     assert(((cdd_tarjan ^ cdd_bf) == cdd_false()) == true);
 
-    assert(((cdd_reduce_2 ^ cdd1) == cdd_false()) == true);
-    assert(((cdd_reduce_2 ^ cdd_tarjan) == cdd_false())== false);
-    assert(((cdd_reduce_2 ^ cdd_reduce_2) == cdd_false()) == true);
-    assert(((cdd_reduce_2 ^ cdd_bf) == cdd_false())==false);
+//    assert(((cdd_reduce_2 ^ cdd1) == cdd_false()) == true);
+//    assert(((cdd_reduce_2 ^ cdd_tarjan) == cdd_false())== false);
+//    assert(((cdd_reduce_2 ^ cdd_reduce_2) == cdd_false()) == true);
+//    assert(((cdd_reduce_2 ^ cdd_bf) == cdd_false())==false);
 
 }
 
 
-static cdd test1_CDD_from_random_DBMs(size_t size, int numberOfDBMs)
-{
+static cdd test1_CDD_from_random_DBMs(size_t size, int numberOfDBMs) {
     cdd cdd_result;
     printf("Test1: Building CDDs and their negations from random DBMs\n");
 
@@ -315,11 +308,11 @@ static cdd test1_CDD_from_random_DBMs(size_t size, int numberOfDBMs)
         printf("_______________\n");
         dbm_print(stdout, dbm, size);
         cdd_result = cdd(dbm, size);
-        cdd_result= cdd_reduce(cdd_result);
+        cdd_result = cdd_reduce(cdd_result);
         print_cdd(cdd_result, "test1_normal", true);
 
         cdd cdd_negated = !cdd_result;
-        cdd_negated= cdd_reduce(cdd_negated);
+        cdd_negated = cdd_reduce(cdd_negated);
         print_cdd(cdd_negated, "test1_negated", true);
 
         assert(cdd_reduce(cdd_result & cdd_negated) == cdd_false());
@@ -355,7 +348,7 @@ static cdd buildSimpleStaticBDD(int bdd_start_level) {
 
 static void extractDBMTest(size_t size, int number_of_DBMs) {
     printf("Running extractDBMTest.\n");
-    cdd cdd_result = randomCddFromDBMs(size,number_of_DBMs);
+    cdd cdd_result = randomCddFromDBMs(size, number_of_DBMs);
     ADBM(dbm);
     /*
     cdd test = cdd_result;
@@ -370,10 +363,10 @@ static void extractDBMTest(size_t size, int number_of_DBMs) {
     print_cdd(two1, "two1", true);
     */
 
-    cdd_result=cdd_reduce(cdd_result);
+    cdd_result = cdd_reduce(cdd_result);
 
     printf("Extracting first BDM. \n");
-    cdd extracted = cdd_extract_dbm(cdd_result,dbm,size);
+    cdd extracted = cdd_extract_dbm(cdd_result, dbm, size);
 
     printf("Printing the extracted BDM. \n");
     dbm_print(stdout, dbm, size);
@@ -387,10 +380,10 @@ static void extractDBMTest(size_t size, int number_of_DBMs) {
     printf("Printing CDD after extracting\n");
     print_cdd(extracted, "extracted", true);
 
-    while ( !cdd_isterminal(extracted.handle())&& cdd_info(extracted.handle())->type != TYPE_BDD  )    {
+    while (!cdd_isterminal(extracted.handle()) && cdd_info(extracted.handle())->type != TYPE_BDD) {
         extracted = cdd_reduce(extracted);
         printf("Extracting\n");
-        extracted = cdd_extract_dbm(extracted,dbm,size);
+        extracted = cdd_extract_dbm(extracted, dbm, size);
         printf("Printing CDD after extracting\n");
         print_cdd(extracted, "extracted_while", true);
         rebuilt |= cdd(dbm, size);
@@ -401,7 +394,7 @@ static void extractDBMTest(size_t size, int number_of_DBMs) {
 
 
     printf("Printing reduced rebuilt CDD \n");
-    rebuilt= cdd_reduce(rebuilt);
+    rebuilt = cdd_reduce(rebuilt);
     print_cdd(rebuilt, "rebuilt_red", true);
 
     cdd one = rebuilt & !cdd_result;
@@ -432,13 +425,12 @@ static void negationTest(size_t size, int number_of_DBMs) {
 }
 
 
-
 static void equalityTest(size_t size, int number_of_DBMs) {
     printf("Running equalityTest.\n");
     cdd cdd_result = randomCddFromDBMs(size, number_of_DBMs);
 
-    assert((cdd_result ^ cdd_result)==cdd_false());
-    assert(cdd_reduce(cdd_result ^ cdd_result)==cdd_false());
+    assert((cdd_result ^ cdd_result) == cdd_false());
+    assert(cdd_reduce(cdd_result ^ cdd_result) == cdd_false());
 }
 
 static void reduceTest(size_t size, int number_of_DBMs) {
@@ -456,12 +448,11 @@ static void reduceTest(size_t size, int number_of_DBMs) {
     print_cdd(one1, "one1", true);
     print_cdd(two1, "two1", true);
 
-    printf("one1 == cdd_false(): %i",one1 == cdd_false());
-    printf("two1 == cdd_false(): %i",two1 == cdd_false());
+    printf("one1 == cdd_false(): %i", one1 == cdd_false());
+    printf("two1 == cdd_false(): %i", two1 == cdd_false());
 
     assert(cdd_reduce(one1) == cdd_false());
     assert(cdd_reduce(two1) == cdd_false());
-
 
 
 }
@@ -544,14 +535,14 @@ static void extractDBMWithBoolsTest(size_t size, int number_of_DBMs, int bdd_sta
     cdd b3 = cdd_bddvarpp(bdd_start_level + 2);
 
     // TODO: make a test for how brackets affect the CDD creation
-    cdd cdd_result1 = (cdd_result &  (b1 & b2 & !b3)) | (b1 & b2 & b3);
+    cdd cdd_result1 = (cdd_result & (b1 & b2 & !b3)) | (b1 & b2 & b3);
     print_cdd(cdd_result1, "outerOR", true);
 
 
-    cdd_result = cdd_result &  ((b1 & b2 & !b3) | (b1 & b2 & b3));
+    cdd_result = cdd_result & ((b1 & b2 & !b3) | (b1 & b2 & b3));
     cdd_result = cdd_reduce(cdd_result);
     printf("Extracting the BDM. \n");
-    cdd extracted = cdd_extract_dbm(cdd_result,dbm,size);
+    cdd extracted = cdd_extract_dbm(cdd_result, dbm, size);
 
     printf("Printing the extracted BDM. \n");
     dbm_print(stdout, dbm, size);
@@ -568,24 +559,23 @@ static void extractDBMWithBoolsTest(size_t size, int number_of_DBMs, int bdd_sta
     printf("Printing CDD after extracting\n");
     print_cdd(extracted, "extractedWB", true);
 
-    while ( !cdd_isterminal(extracted.handle())&& cdd_info(extracted.handle())->type != TYPE_BDD  )    {
+    while (!cdd_isterminal(extracted.handle()) && cdd_info(extracted.handle())->type != TYPE_BDD) {
         extracted = cdd_reduce(extracted);
         printf("Extracting\n");
-        extracted = cdd_extract_dbm(extracted,dbm,size);
+        extracted = cdd_extract_dbm(extracted, dbm, size);
         printf("Printing CDD after extracting\n");
         print_cdd(extracted, "extractedWB_while", true);
         rebuilt |= cdd(dbm, size);
     }
 
     printf("Printing rebuilt rebuilt CDD \n");
-    rebuilt= cdd_reduce(rebuilt);
+    rebuilt = cdd_reduce(rebuilt);
     print_cdd(rebuilt, "rebuiltWB", true);
 
-    rebuilt = rebuilt &  ((b1 & b2 & !b3) | (b1 & b2 & b3));
+    rebuilt = rebuilt & ((b1 & b2 & !b3) | (b1 & b2 & b3));
 
-    assert(cdd_reduce(cdd_result  ^ rebuilt) == cdd_false());
+    assert(cdd_reduce(cdd_result ^ rebuilt) == cdd_false());
 }
-
 
 
 static void containsDBMTest(size_t size, int number_of_DBMs) {
@@ -603,17 +593,18 @@ static void containsDBMTest(size_t size, int number_of_DBMs) {
     }
 
     dbm_print(stdout, dbm, size);
-    printf("Checking if the last added DBM is included: %i\n", cdd_contains(cdd_result,dbm,size));
-    assert(cdd_contains(cdd_result,dbm,size));
+    printf("Checking if the last added DBM is included: %i\n", cdd_contains(cdd_result, dbm, size));
+    assert(cdd_contains(cdd_result, dbm, size));
 
     ADBM(dbm1);
     printf("Extracting a BDM. \n");
-    cdd extracted = cdd_extract_dbm(cdd_result,dbm1,size);
+    cdd_result = cdd_reduce(cdd_result);
+    cdd extracted = cdd_extract_dbm(cdd_result, dbm1, size);
 
     dbm_print(stdout, dbm1, size);
 
-    printf("Checking if the last added DBM is included: %i\n", cdd_contains(extracted,dbm,size));
-    assert(!cdd_contains(extracted,dbm1,size));
+    printf("Checking if the last added DBM is included: %i\n", cdd_contains(extracted, dbm, size));
+    assert(!cdd_contains(extracted, dbm1, size));
 
     printf("Printing CDD after extracting\n");
     print_cdd(extracted, "extracted", false);
@@ -656,86 +647,82 @@ static cdd buildCDDWithBooleansTest(size_t size, int number_of_DBMs, int number_
     cdd b3 = cdd_bddvarpp(bdd_start_level + 2);
     cdd b4 = cdd_bddvarpp(bdd_start_level + 3);
 
-    printf("Before adding boolean vars, the inclusion check is %i \n",cdd_contains(cdd_result,dbm,size));
-    cdd_result = cdd_result &  (b1 & b2 & !b3) | (b1 & b2 & b3);
-    printf("After adding boolean vars, the inclusion check is %i \n",cdd_contains(cdd_result,dbm,size));
-    assert(cdd_contains(cdd_result,dbm,size));
+    printf("Before adding boolean vars, the inclusion check is %i \n", cdd_contains(cdd_result, dbm, size));
+    cdd_result = cdd_result & (b1 & b2 & !b3) | (b1 & b2 & b3);
+    printf("After adding boolean vars, the inclusion check is %i \n", cdd_contains(cdd_result, dbm, size));
+    assert(cdd_contains(cdd_result, dbm, size));
     return cdd_result;
 }
 
-static bool cddContainsBoolStateRec(ddNode* r, bool state[], int bdd_start_level, int index, bool negated) {
+static bool cddContainsBoolStateRec(ddNode *r, bool state[], int bdd_start_level, int index, bool negated) {
     assert(cdd_info(r)->type == TYPE_BDD);
-    bddNode* node = bdd_node(r);
+    bddNode *node = bdd_node(r);
 
-    if (node->level!=index+bdd_start_level)
-        return (cddContainsBoolStateRec(r, state, bdd_start_level, index+1, negated));
+    if (node->level != index + bdd_start_level)
+        return (cddContainsBoolStateRec(r, state, bdd_start_level, index + 1, negated));
 
-    if (node->high==cddtrue) {
+    if (node->high == cddtrue) {
         if (state[index]) return true ^ negated ^ cdd_is_negated(r);
     }
-    if (node->high==cddfalse) {
+    if (node->high == cddfalse) {
         if (state[index]) return false ^ negated ^ cdd_is_negated(r);
     }
-    if (node->low==cddtrue) {
+    if (node->low == cddtrue) {
         if (!state[index]) return true ^ negated ^ cdd_is_negated(r);
     }
-    if (node->low==cddfalse) {
+    if (node->low == cddfalse) {
         if (!state[index]) return false ^ negated ^ cdd_is_negated(r);
     }
 
     if (state[index])
-        return cddContainsBoolStateRec(node->high, state, bdd_start_level, index+1, negated ^ cdd_is_negated(r));
+        return cddContainsBoolStateRec(node->high, state, bdd_start_level, index + 1, negated ^ cdd_is_negated(r));
     else
-        return cddContainsBoolStateRec(node->low, state, bdd_start_level, index+1, negated ^ cdd_is_negated(r));
+        return cddContainsBoolStateRec(node->low, state, bdd_start_level, index + 1, negated ^ cdd_is_negated(r));
 
 }
 
 
-static bool cddContainsStateRec(ddNode* r, bool state[], int bdd_start_level, int index, bool negated) {
+static bool cddContainsStateRec(ddNode *r, bool state[], int bdd_start_level, int index, bool negated) {
 
     if (cdd_info(r)->type == TYPE_BDD)
-        return cddContainsBoolStateRec(r,state, bdd_start_level,index, negated);
-    else
-    {
+        return cddContainsBoolStateRec(r, state, bdd_start_level, index, negated);
+    else {
         // TODO: this part is just skipped at the moment, add support for CDDs
         printf("encountrered CDD");
-        cddNode* node = cdd_node(r);
-        return cddContainsStateRec(node->next,state, bdd_start_level,index, negated);
+        cddNode *node = cdd_node(r);
+        return cddContainsStateRec(node->next, state, bdd_start_level, index, negated);
     }
 
 }
 
-bool cddContainsState(ddNode* cdd_, bool state[], int bdd_start_level)
-{
+bool cddContainsState(ddNode *cdd_, bool state[], int bdd_start_level) {
 
-   return cddContainsStateRec(cdd_, state, bdd_start_level, 0, false);
+    return cddContainsStateRec(cdd_, state, bdd_start_level, 0, false);
 }
 
-bool cddFromIntervalTest()
-{
+bool cddFromIntervalTest() {
     // note that 5 means 2 including, while the 10 below means 5 non including
-    cdd smaller = cdd_interval(1,0,0,5);
-    print_cdd(smaller,"smaller",true);
-    cdd larger = cdd_interval(1,0,0,10);
-    print_cdd(larger,"larger",true);
-    assert(cdd_reduce(larger - smaller) != cdd_false() );
-    assert(cdd_reduce(smaller - larger) == cdd_false() );
+    cdd smaller = cdd_interval(1, 0, 0, 5);
+    print_cdd(smaller, "smaller", true);
+    cdd larger = cdd_interval(1, 0, 0, 10);
+    print_cdd(larger, "larger", true);
+    assert(cdd_reduce(larger - smaller) != cdd_false());
+    assert(cdd_reduce(smaller - larger) == cdd_false());
 }
 
-bool orOfBCDDTest(  int32_t bdd_start_level)
-{
+bool orOfBCDDTest(int32_t bdd_start_level) {
     // note that 5 means 2 including, while the 10 below means 5 non including
     cdd b6 = cdd_bddvarpp(bdd_start_level + 0);
 
-    cdd smaller = cdd_interval(1,0,0,5);
+    cdd smaller = cdd_interval(1, 0, 0, 5);
     smaller &= b6;
-    print_cdd(smaller,"smaller",true);
-    cdd larger = cdd_interval(1,0,6,10);
+    print_cdd(smaller, "smaller", true);
+    cdd larger = cdd_interval(1, 0, 6, 10);
     larger &= !b6;
-    print_cdd(larger,"larger",true);
+    print_cdd(larger, "larger", true);
     cdd result = larger | smaller;
     cdd_reduce(result);
-    print_cdd(result,"orOfBCDD",true);
+    print_cdd(result, "orOfBCDD", true);
     return true;
     //TODO: Figure out good assert
 }
@@ -744,14 +731,14 @@ bool orExactractTest(size_t size, int32_t bdd_start_level) {
     // note that 5 means 2 including, while the 10 below means 5 non including
     cdd b6 = cdd_bddvarpp(bdd_start_level + 0);
 
-    cdd smaller = cdd_intervalpp(1,0,0,5);
-    smaller &= cdd_interval(2,0,0,dbm_LS_INFINITY);
-    smaller &= cdd_interval(3,0,0,dbm_LS_INFINITY);
+    cdd smaller = cdd_intervalpp(1, 0, 0, 5);
+    smaller &= cdd_interval(2, 0, 0, dbm_LS_INFINITY);
+    smaller &= cdd_interval(3, 0, 0, dbm_LS_INFINITY);
     smaller &= b6;
-    print_cdd(smaller,"smaller",true);
-    cdd larger = cdd_intervalpp(1,0,6,10);
-    larger &= cdd_interval(2,0,0,dbm_LS_INFINITY);
-    larger &= cdd_interval(3,0,0,dbm_LS_INFINITY);
+    print_cdd(smaller, "smaller", true);
+    cdd larger = cdd_intervalpp(1, 0, 6, 10);
+    larger &= cdd_interval(2, 0, 0, dbm_LS_INFINITY);
+    larger &= cdd_interval(3, 0, 0, dbm_LS_INFINITY);
     larger &= !b6;
     print_cdd(larger, "larger", true);
     cdd result = larger | smaller;
@@ -765,7 +752,7 @@ bool orExactractTest(size_t size, int32_t bdd_start_level) {
 
 
     print_cdd(extract, "extract", true);
-    cdd dbmcdd= cdd(dbm,size);
+    cdd dbmcdd = cdd(dbm, size);
     print_cdd(dbmcdd, "dbm", true);
 
     cdd extract1 = cdd_extract_dbm(extract, dbm, size);
@@ -774,32 +761,29 @@ bool orExactractTest(size_t size, int32_t bdd_start_level) {
 }
 
 
-bool orExactractWithBddTest(size_t size, int32_t bdd_start_level)
-{
+bool orExactractWithBddTest(size_t size, int32_t bdd_start_level) {
     // note that 5 means 2 including, while the 10 below means 5 non including
     cdd b6 = cdd_bddvarpp(bdd_start_level + 0);
 
-    cdd smaller = cdd_intervalpp(1,0,0,5);
-    smaller &= cdd_interval(2,0,0,dbm_LS_INFINITY);
-    smaller &= cdd_interval(3,0,0,dbm_LS_INFINITY);
+    cdd smaller = cdd_intervalpp(1, 0, 0, 5);
+    smaller &= cdd_interval(2, 0, 0, dbm_LS_INFINITY);
+    smaller &= cdd_interval(3, 0, 0, dbm_LS_INFINITY);
     smaller &= b6;
-    print_cdd(smaller,"smaller",true);
-    cdd larger = cdd_intervalpp(1,0,6,10);
-    larger &= cdd_interval(2,0,0,dbm_LS_INFINITY);
-    larger &= cdd_interval(3,0,0,dbm_LS_INFINITY);
+    print_cdd(smaller, "smaller", true);
+    cdd larger = cdd_intervalpp(1, 0, 6, 10);
+    larger &= cdd_interval(2, 0, 0, dbm_LS_INFINITY);
+    larger &= cdd_interval(3, 0, 0, dbm_LS_INFINITY);
     larger &= !b6;
-    print_cdd(larger,"larger",true);
+    print_cdd(larger, "larger", true);
     cdd result = larger | smaller;
     cdd_reduce(result);
-    print_cdd(result,"orOfBCDD",true);
-
-
+    print_cdd(result, "orOfBCDD", true);
 
 
     cdd cdd_at_bottom;
     ADBM(dbm);
-
-    cdd extract = cdd_extract_dbm_and_bdd(result,dbm, size,cdd_at_bottom);
+    // TODO: This is deprecated!!!
+    cdd extract = cdd_extract_dbm_and_bdd(result, dbm, size, cdd_at_bottom);
     printf("came out of the extraction\n");
     printf("Current pointer value: %p\n", cdd_at_bottom.handle());
 
@@ -809,13 +793,13 @@ bool orExactractWithBddTest(size_t size, int32_t bdd_start_level)
     removed = cdd_reduce(removed);
 
     cdd_at_bottom = cdd_reduce(cdd_at_bottom);
-    print_cdd(extract,"extract", true);
-    print_cdd(removed,"removed", true);
-    print_cdd(cdd_at_bottom,"cdd_at_bottom", true);
+    print_cdd(extract, "extract", true);
+    print_cdd(removed, "removed", true);
+    print_cdd(cdd_at_bottom, "cdd_at_bottom", true);
 
     cdd cdd_at_bottom1;
     ADBM(dbm1);
-    cdd extract1 = cdd_extract_dbm_and_bdd(extract,dbm1, size,cdd_at_bottom1);
+    cdd extract1 = cdd_extract_dbm_and_bdd(extract, dbm1, size, cdd_at_bottom1);
     printf("came out of the extraction\n");
 
     extract1 = cdd_reduce(extract1);
@@ -823,45 +807,319 @@ bool orExactractWithBddTest(size_t size, int32_t bdd_start_level)
     removed1 = cdd_reduce(removed1);
 
     cdd_at_bottom1 = cdd_reduce(cdd_at_bottom1);
-    print_cdd(extract1,"extract1", true);
-    print_cdd(removed1,"removed1", true);
-    print_cdd(cdd_at_bottom1,"cdd_at_bottom1", true);
+    print_cdd(extract1, "extract1", true);
+    print_cdd(removed1, "removed1", true);
+    print_cdd(cdd_at_bottom1, "cdd_at_bottom1", true);
 
 
     cdd rebuilt = (removed & cdd_at_bottom) | (removed1 & cdd_at_bottom1);
-    rebuilt= cdd_reduce(rebuilt);
+    rebuilt = cdd_reduce(rebuilt);
 
-    print_cdd(rebuilt,"rebuilt", true);
-    assert(cdd_equiv(rebuilt,result));
-
-
-
+    print_cdd(rebuilt, "rebuilt", true);
+    assert(cdd_equiv(rebuilt, result));
 
 
     return true;
     //TODO: Figure out good assert
 }
 
-void restrictTest( int32_t number_of_booleans, int32_t bdd_start_level)
+
+bool extractEdgeCasesTest(size_t size, int32_t bdd_start_level) {
+    // note that 5 means 2 including, while the 10 below means 5 non including
+    cdd b6 = cdd_bddvarpp(bdd_start_level + 0);
+    cdd b7 = cdd_bddvarpp(bdd_start_level + 1);
+
+    cdd smaller = cdd_intervalpp(1, 0, 0, 5);
+    smaller &= cdd_interval(2, 0, 0, dbm_LS_INFINITY);
+    smaller &= cdd_interval(3, 0, 0, dbm_LS_INFINITY);
+    //smaller &= b6;
+    print_cdd(smaller, "smaller", true);
+    cdd larger = cdd_intervalpp(1, 0, 6, 10);
+    larger &= cdd_interval(2, 0, 0, dbm_LS_INFINITY);
+    larger &= cdd_interval(3, 0, 0, dbm_LS_INFINITY);
+    //larger &= !b6;
+    print_cdd(larger, "larger", true);
+    cdd result = larger | smaller;
+    cdd_reduce(result);
+    print_cdd(result, "orOfBCDD", true);
+
+
+    cdd cdd_at_bottom;
+    ADBM(dbm);
+
+    cdd extract = cdd_extract_bdd(result, dbm, size);
+    print_cdd(extract,"empty_bdd",true);
+
+
+    ADBM(dbm1);
+    cdd pure_bdd = !b6 & b7;
+    cdd extractBDD = cdd_extract_bdd(pure_bdd, dbm1, size);
+    print_cdd(extractBDD,"empty_bdd",true);
+    cdd remainder = cdd_extract_dbm(pure_bdd, dbm1, size);
+    dbm_print(stdout,dbm1, size);
+    remainder = cdd_reduce(remainder);
+    //ADBM(dbm2)
+    //dbm_init(dbm2, size);
+    //remainder &= cdd(dbm2,size);
+    remainder = cdd_remove_negative(remainder);
+    print_cdd(remainder,"remainder1",true);
+
+    return true;
+    //TODO: Figure out good assert
+}
+
+
+
+void restrictTest(int32_t number_of_booleans, int32_t bdd_start_level) {
+    // deprecated, restrict is not used anymore
+    //assert(false);
+    /*cdd b6 = cdd_bddvarpp(bdd_start_level + 0);
+    cdd b7 = cdd_bddvarpp(bdd_start_level + 1);
+    cdd b8 = cdd_bddvarpp(bdd_start_level + 2);
+    cdd b9 = cdd_bddvarpp(bdd_start_level + 3);
+    cdd result = (!b6 & !b7) | (!b8 & b9);
+    print_cdd(result, "before_restriction", true);
+    cdd result1 = cdd_restrict(result, bdd_start_level + 2, 0);
+    print_cdd(result1, "after_restriction", true);
+    cdd result2 = cdd_restrict(result, bdd_start_level + 1, 1);
+    print_cdd(result2, "after_restriction", true);
+    cdd result3 = cdd_restrict(result2, bdd_start_level + 2, 1);
+    print_cdd(result3, "after_restriction", true);
+
+    assert(result3 == cdd_false());*/
+}
+
+int nstrict(int inputNumber)
 {
+    return inputNumber*2 +1;
+}
+int strict(int inputNumber)
+{
+    return inputNumber*2 ;
+}
+
+static inline void base_resetBits(uint32_t* bits, size_t n)
+{
+    assert(n == 0 || bits);
+    for (; n != 0; --n)
+        *bits++ = 0;
+}
+
+void traverseTransitionTest(size_t size, int number_of_DBMs, int32_t number_of_booleans, int32_t bdd_start_level) {
     cdd b6 = cdd_bddvarpp(bdd_start_level + 0);
     cdd b7 = cdd_bddvarpp(bdd_start_level + 1);
     cdd b8 = cdd_bddvarpp(bdd_start_level + 2);
     cdd b9 = cdd_bddvarpp(bdd_start_level + 3);
-    cdd result =  (!b6 & !b7 ) |  ( !b8 & b9);
-    print_cdd(result, "before_restriction", true );
-    cdd result1 = cdd_restrict(result, reinterpret_cast<int32_t *>(bdd_start_level + 2), 0);
-    print_cdd(result1, "after_restriction", true );
-    cdd result2 = cdd_restrict(result, reinterpret_cast<int32_t *>(bdd_start_level + 1), reinterpret_cast<int32_t *>(1));
-    print_cdd(result2, "after_restriction", true );
-    cdd result3 = cdd_restrict(result2, reinterpret_cast<int32_t *>(bdd_start_level + 2), reinterpret_cast<int32_t *>(1));
-    print_cdd(result3, "after_restriction", true );
-    assert( result3 == cdd_false());
+    cdd stateBeforeTrans = cdd_true();
+
+    // Assume we start in an unconstrained state, with three clocks and 4 boolean variables
+    // We take a transition with guard (x1>5 && b6==true) | (x2<4 && b7==false)
+    cdd left = cdd_intervalpp(1, 0, strict(5), dbm_LS_INFINITY);
+    left &= cdd_interval(2, 0, 0, dbm_LS_INFINITY);
+    left &= cdd_interval(3, 0, 0, dbm_LS_INFINITY);
+    left &= b6;
+    print_cdd(left, "left", true);
+    cdd right = cdd_intervalpp(2, 0, 0, strict(4));
+    right &= cdd_interval(1, 0, 0, dbm_LS_INFINITY);
+    right &= cdd_interval(3, 0, 0, dbm_LS_INFINITY);
+    right &= !b7;
+    print_cdd(right, "right", true);
+    left = cdd_reduce(left);
+    right = cdd_reduce(right);
+    print_cdd(right, "rightRed", true);
+
+    cdd guard = left | right;
+    cdd stateAfterGuard = stateBeforeTrans & guard;
+    stateAfterGuard= cdd_reduce(stateAfterGuard);
+    print_cdd(stateAfterGuard, "afterGuard", true);
+
+    // the transition has an update of x1=0 & b7=true
+    // 1. apply the booleans
+    int arr[4] = {0,0,0,0};
+    int *clockPtr = arr;
+    int arr1[5+6] = {0,0,0,0,0,0,0,0,0,0,0};
+    arr1[bdd_start_level + 1] = 1;
+    int *boolPtr = arr1;
+    cdd stateAfterBoolExist = cdd_exist(stateAfterGuard, boolPtr, clockPtr);
+    print_cdd(stateAfterBoolExist, "afterBoolExist", true);
+    cdd stateAfterBool = stateAfterBoolExist & b7;
+    print_cdd(stateAfterBool, "afterBoolReset", true);
+    // 2. apply the clock update
+    cdd rebuilt = cdd_false();
+    cdd rebuilt_second_approach = cdd_false();
+    cdd stateAfterBool_second_approach = stateAfterBool;
+    ADBM(dbm);
+    cdd cdd_at_bottom;
+    while (!cdd_isterminal(stateAfterBool.handle()) && cdd_info(stateAfterBool.handle())->type != TYPE_BDD) {
+
+        stateAfterBool = cdd_reduce(stateAfterBool);
+        cdd_at_bottom = cdd_extract_bdd(stateAfterBool, dbm, size);
+        print_cdd(cdd_at_bottom, "cdd_at_bottom", true);
+        stateAfterBool = cdd_extract_dbm(stateAfterBool, dbm, size);
+
+        print_cdd(stateAfterBool, "beforeReduce", true);
+        stateAfterBool = cdd_reduce(stateAfterBool);
+        print_cdd(stateAfterBool, "extractedOneDBM", true);
+        dbm_updateValue(dbm,size,1,0);
+        dbm_up(dbm,size);
+        rebuilt |= (cdd(dbm, size) & cdd_at_bottom);
+        print_cdd(rebuilt, "resultOfCurrentIteration", true);
+/*
+        // second approach
+        cdd cdd_at_bottom_second_approach;
+        ADBM(dbm1);
+        printf("0 \n");
+        stateAfterBool_second_approach = cdd_reduce(stateAfterBool_second_approach);
+        printf("1 \n");
+        stateAfterBool_second_approach = cdd_extract_dbm_and_bdd(stateAfterBool_second_approach, dbm1, size, cdd_at_bottom_second_approach);
+        printf("2 \n");
+        print_cdd(stateAfterBool_second_approach, "extractedOneDBM_second_approach", true);
+        stateAfterBool_second_approach = cdd_reduce(stateAfterBool_second_approach);
+        print_cdd(stateAfterBool_second_approach, "extractedOneDBM_second_approach", true);
+        dbm_updateValue(dbm1,size,1,0);
+        dbm_up(dbm1,size);
+        rebuilt_second_approach |= (cdd(dbm1, size) & cdd_at_bottom_second_approach);
+        print_cdd(rebuilt_second_approach, "resultOfCurrentIteration_second_approach", true);
+        */
+    }
+//    assert(cdd_equiv(rebuilt,rebuilt_second_approach));
 }
 
 
-static cdd MartijnTest(int bdd_start_level)
-{
+// functions we want to expose:
+// input enabledness:
+// - complement (should be there)
+//
+// forward transitions:
+//  - existential quantification on bools
+//
+// backward transition:
+// - existential quantification on bools and clocks ?
+//
+// general BDD handling:
+// - print
+// - extractMetaFederation
+// - isTerminal
+// - BCDD to guard
+//   - is there a better way than extracting DBM by BDM?
+//   - to be done on the C side? Yes ---  But how to return it? as a string?
+//   - do we need a way to get variable names into the BCDD library?
+//   - can we in the GUI display the BCDD for an edge?
+//
+// -
+
+
+
+
+
+
+void inputEnableTest(size_t size, int number_of_DBMs, int32_t number_of_booleans, int32_t bdd_start_level) {
+    cdd b6 = cdd_bddvarpp(bdd_start_level + 0);
+    cdd b7 = cdd_bddvarpp(bdd_start_level + 1);
+    cdd b8 = cdd_bddvarpp(bdd_start_level + 2);
+    cdd b9 = cdd_bddvarpp(bdd_start_level + 3);
+    cdd stateBeforeTrans = cdd_true();
+
+    // Assume we have two output transitions with
+    // guard 1: (x1>5 && b6==true) | (x2<4 && b7==false)
+    // and guard 2: (x2<3 && b6==false) | (x2>4 && b7 && b8)
+    cdd left = cdd_intervalpp(1, 0, strict(5), dbm_LS_INFINITY);
+    left &= cdd_interval(2, 0, 0, dbm_LS_INFINITY);
+    left &= cdd_interval(3, 0, 0, dbm_LS_INFINITY);
+    left &= b6;
+    print_cdd(left, "left", true);
+    cdd right = cdd_intervalpp(2, 0, 0, strict(4));
+    right &= cdd_interval(1, 0, 0, dbm_LS_INFINITY);
+    right &= cdd_interval(3, 0, 0, dbm_LS_INFINITY);
+    right &= !b7;
+    print_cdd(right, "right", true);
+    left = cdd_reduce(left);
+    right = cdd_reduce(right);
+    print_cdd(right, "rightRed", true);
+    cdd guard1 = left | right;
+
+    left = cdd_intervalpp(2, 0, 0, strict(3));
+    left &= cdd_interval(1, 0, 0, dbm_LS_INFINITY);
+    left &= cdd_interval(3, 0, 0, dbm_LS_INFINITY);
+    left &= !b6;
+    print_cdd(left, "left", true);
+    right = cdd_intervalpp(2, 0, strict(4), dbm_LS_INFINITY);
+    right &= cdd_interval(1, 0, 0, dbm_LS_INFINITY);
+    right &= cdd_interval(3, 0, 0, dbm_LS_INFINITY);
+    right &= b7 & b8;
+    print_cdd(right, "right", true);
+    left = cdd_reduce(left);
+    right = cdd_reduce(right);
+    print_cdd(right, "rightRed", true);
+    cdd guard2 = left | right;
+
+
+    cdd mergedInputs = guard1 | guard2;
+    mergedInputs= cdd_reduce(mergedInputs);
+    print_cdd(mergedInputs, "mergedInputs", true);
+
+    cdd complement = !mergedInputs;
+    // TODO: MAKE ASSERT
+
+}
+
+
+void existTest(size_t size, int number_of_DBMs, int32_t number_of_booleans, int32_t bdd_start_level) {
+    cdd cdd_part = randomCddFromDBMs(size, number_of_DBMs);
+    cdd b6 = cdd_bddvarpp(bdd_start_level + 0);
+    cdd b7 = cdd_bddvarpp(bdd_start_level + 1);
+    cdd b8 = cdd_bddvarpp(bdd_start_level + 2);
+    cdd b9 = cdd_bddvarpp(bdd_start_level + 3);
+    cdd bdd_part = (!b6 & !b7) | (!b8 & b9);
+    cdd result = cdd_part & bdd_part;
+    int arr[4] = {0,1,0,0};
+    int *clockPtr = arr;
+    int arr1[5+6] = {0,0,0,0,0,0,1,0,0,0,0};
+    int *boolPtr = arr1;
+    cdd result1 = cdd_exist(result, boolPtr, clockPtr);
+    result1 = cdd_reduce(result1);
+    print_cdd(result, "pre_exist_result", true);
+    print_cdd(result1, "exist_result", true);
+
+    cdd result2 = cdd_exist(result1, boolPtr, clockPtr);
+    result2 = cdd_reduce(result2);
+    print_cdd(result2, "exist_result2", true);
+
+    cdd  result3 = cdd_exist(result2, boolPtr, clockPtr);
+    result3 = cdd_reduce(result3);
+    print_cdd(result3, "exist_result3", true);
+    //assert(result3==cdd_false());
+}
+
+
+void restrictBCDDTest(size_t size, int number_of_DBMs, int32_t number_of_booleans, int32_t bdd_start_level) {
+    cdd cdd_part = randomCddFromDBMs(size, number_of_DBMs);
+    cdd b6 = cdd_bddvarpp(bdd_start_level + 0);
+    cdd b7 = cdd_bddvarpp(bdd_start_level + 1);
+    cdd b8 = cdd_bddvarpp(bdd_start_level + 2);
+    cdd b9 = cdd_bddvarpp(bdd_start_level + 3);
+    cdd bdd_part = (!b6 & !b7) | (!b8 & b9);
+    cdd result = cdd_part & bdd_part;
+    int32_t isFalse = 0;
+    int32_t isTrue = 1;
+    result = cdd_reduce(result);
+    print_cdd(result, "before_restrictionBCC", true);
+    cdd result1 = cdd_restrict(result, bdd_start_level + 2, isFalse);
+    print_cdd(result1, "after_restrictionBCC", true);
+    cdd result2 = cdd_restrict(result, bdd_start_level + 1, isTrue);
+    print_cdd(result2, "after_restrictionBCC", true);
+    result2 = cdd_reduce(result2);
+    cdd result3 = cdd_restrict(result2, bdd_start_level + 2, isTrue);
+    print_cdd(result3, "after_restrictionBCC", true);
+    result3 = cdd_reduce(result3);
+    //assert(result3 == cdd_false());
+    print_cdd(result3, "after_restriction_after_reduceBCC", true);
+
+
+    //assert(result3 == cdd_false());
+}
+
+static cdd MartijnTest(int bdd_start_level) {
     cdd b6 = cdd_bddvarpp(bdd_start_level + 0);
     cdd b7 = cdd_bddvarpp(bdd_start_level + 1);
     cdd b8 = cdd_bddvarpp(bdd_start_level + 2);
@@ -869,42 +1127,42 @@ static cdd MartijnTest(int bdd_start_level)
 
     cdd result;
     // single traces
-    result =  (!b6 & !b7 & !b8 & b9);
+    result = (!b6 & !b7 & !b8 & b9);
     print_cdd(result, "!b6!b7!b8b9", true);
-    bool state[4] = {false, false, false,true};
+    bool state[4] = {false, false, false, true};
     assert(cddContainsState(result.handle(), state, bdd_start_level));
-    bool state1[4] = {false, false, true,true};
+    bool state1[4] = {false, false, true, true};
     assert(!cddContainsState(result.handle(), state1, bdd_start_level));
 
 
-    result =  (!b6 & !b7 & b8 & b9);
+    result = (!b6 & !b7 & b8 & b9);
     print_cdd(result, "!b6!b7b8b9", true);
-    bool state2[4] = {false, false, true,true};
+    bool state2[4] = {false, false, true, true};
     assert(cddContainsState(result.handle(), state2, bdd_start_level));
-    bool state3[4] = {false, false, false,true};
+    bool state3[4] = {false, false, false, true};
     assert(!cddContainsState(result.handle(), state3, bdd_start_level));
 
-    result =  (!b6 & b7 & b8 & b9);
+    result = (!b6 & b7 & b8 & b9);
     print_cdd(result, "!b6b7b8b9", true);
-    bool state4[4] = {false, true, true,true};
+    bool state4[4] = {false, true, true, true};
     assert(cddContainsState(result.handle(), state4, bdd_start_level));
-    bool state5[4] = {false, false, false,true};
+    bool state5[4] = {false, false, false, true};
     assert(!cddContainsState(result.handle(), state5, bdd_start_level));
 
-    result =  (!b6 & b7 & b8 & !b9);
+    result = (!b6 & b7 & b8 & !b9);
     print_cdd(result, "!b6b7b8!b9", true);
 
-    bool state6[4] = {false, true, true,false};
+    bool state6[4] = {false, true, true, false};
     assert(cddContainsState(result.handle(), state6, bdd_start_level));
-    bool state7[4] = {false, false, false,true};
+    bool state7[4] = {false, false, false, true};
     assert(!cddContainsState(result.handle(), state7, bdd_start_level));
 
-    result =  (b6 & b7 & !b8 & !b9);
+    result = (b6 & b7 & !b8 & !b9);
     print_cdd(result, "b6b7!b8!b9", true);
 
-    bool state8[4] = {true, true, false,false};
+    bool state8[4] = {true, true, false, false};
     assert(cddContainsState(result.handle(), state8, bdd_start_level));
-    bool state9[4] = {false, false, false,true};
+    bool state9[4] = {false, false, false, true};
     assert(!cddContainsState(result.handle(), state9, bdd_start_level));
 
     result = (b6 & b7 & b8) | (!b6 & !b7 & !b8);
@@ -965,42 +1223,58 @@ static cdd MartijnTest(int bdd_start_level)
     return result;
 }
 
-int main(int argc, char* argv[])
-{
-    srand(300);
+int main(int argc, char *argv[]) {
+
     uint32_t number_of_clocks, number_of_clocks_including_zero, number_of_DBMs, number_of_booleans;
     number_of_clocks = 3;
     number_of_clocks_including_zero = number_of_clocks + 1;
-    number_of_DBMs = 2;
+    number_of_DBMs = 3;
     number_of_booleans = 5;
 
-    cdd_init(1000000,100000,100000);
+    cdd_init(1000000, 100000, 100000);
     cdd_add_clocks(number_of_clocks_including_zero);
     int bdd_start_level = cdd_add_bddvar(number_of_booleans);
+    cdd cdd_main;
 
-    orExactractTest(number_of_clocks_including_zero, bdd_start_level);
-    orOfBCDDTest( bdd_start_level);
-    orExactractWithBddTest(number_of_clocks_including_zero,bdd_start_level);
+    for (int i = 1; i <= 1; i++) {
+        printf("running tests with seed %i\n", i);
+        srand(i); //300
+        extractEdgeCasesTest(number_of_clocks_including_zero, bdd_start_level);
+/*
+        //restrictBCDDTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
+        //existTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
+        traverseTransitionTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
+        inputEnableTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
 
 
-    cdd cdd_main = test1_CDD_from_random_DBMs(number_of_clocks_including_zero, number_of_DBMs);
+        orExactractWithBddTest(4, bdd_start_level); // hard coded number of clocks needed to the the use ot cdd_interval
+        orExactractTest(number_of_clocks_including_zero, bdd_start_level);
+        orOfBCDDTest(bdd_start_level);
+        cdd cdd_main;
+        cdd_main = test1_CDD_from_random_DBMs(number_of_clocks_including_zero, number_of_DBMs);
+        containsDBMTest(number_of_clocks_including_zero, number_of_DBMs);
+        reduceTest(number_of_clocks_including_zero, number_of_DBMs);
+        test_reduce(number_of_clocks_including_zero);
+        equalityTest(number_of_clocks_including_zero, number_of_DBMs);
+        negationTest(number_of_clocks_including_zero, number_of_DBMs);
+        extractDBMTest(number_of_clocks_including_zero, number_of_DBMs);
+        extractDBMWithBoolsTest(number_of_clocks_including_zero, number_of_DBMs, bdd_start_level);
+        cddFromIntervalTest();
+        orOfBCDDTest(bdd_start_level);
+        restrictTest(number_of_booleans, bdd_start_level);
+        cdd_main = buildCDDWithBooleansTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
+        cdd_main = buildSimpleStaticBDD(bdd_start_level);
+        cdd_main = MartijnTest(bdd_start_level);
+*/
 
-    containsDBMTest(number_of_clocks_including_zero,number_of_DBMs);
-    reduceTest(number_of_clocks_including_zero,number_of_DBMs);
-    test_reduce(number_of_clocks_including_zero);
-    equalityTest(number_of_clocks_including_zero,number_of_DBMs);
-    negationTest(number_of_clocks_including_zero,number_of_DBMs);
-    extractDBMTest(number_of_clocks_including_zero,number_of_DBMs);
-    orExactractWithBddTest(number_of_clocks_including_zero,bdd_start_level);
-    extractDBMWithBoolsTest(number_of_clocks_including_zero,number_of_DBMs, bdd_start_level);
-    cddFromIntervalTest();
-    orOfBCDDTest(bdd_start_level);
-    restrictTest(  number_of_booleans,  bdd_start_level);
-    cdd_main = buildCDDWithBooleansTest(number_of_clocks+1, number_of_DBMs, number_of_booleans, bdd_start_level);
-    cdd_main = buildSimpleStaticBDD(bdd_start_level);
-    cdd_main = MartijnTest(bdd_start_level);
+        printf("finished tests with seed %i\n", i);
+
+
+        printf("done %i\n", i);
+    }
 
     cdd_done();
+    std::cerr << "Completed Test Cases" << std::endl;
     exit(0);
 }
 

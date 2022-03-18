@@ -270,6 +270,16 @@ extern void cdd_ensure_running();
 extern int32_t cdd_add_bddvar(int32_t n);
 
 /**
+ * Interprate the CDD as clock values, and remove any negative
+ * clock values.
+ * @param the original cdd
+ * @return a cdd that does not contain negative value
+ */
+extern ddNode* cdd_remove_negative(ddNode* node);
+
+
+
+/**
  * Declares a number of clock variables. The library maintains a list
  * of boolean and clock variables. This functions adds more clock
  * variables to this list. Since CDD nodes describe differences
@@ -551,7 +561,7 @@ extern ddNode* cdd_replace(ddNode*, int32_t*, int32_t*);
 /**
  * Restricts the boolean variable at the given level in the BDD according to the provided value
  */
-extern ddNode* cdd_restrict(ddNode* node, int32_t* bdd_var_level, int32_t* assignment);
+extern ddNode* cdd_restrict(ddNode* node, int32_t bdd_var_level, int32_t assignment);
 
 /**
  * If then else operation. @todo
@@ -606,6 +616,20 @@ extern ddNode* cdd_from_dbm(const raw_t* dbm, int32_t dim);
  * @return the difference between \a cdd and \a dbm
  */
 extern ddNode* cdd_extract_dbm(ddNode* cdd, raw_t* dbm, int32_t dim);
+
+
+/**
+ * Extract a BDD from the botten of a given CDD
+ * \a cdd and write it to \a dbm.  It will return a CDD equivalent to
+ * \a cdd \ \c cdd_from_dbm(dbm).
+ * PRECONDITION: call CDD reduce first!!!
+ * @param cdd a cdd
+ * @param dbm a dbm
+ * @return the difference between \a cdd and \a dbm
+ */
+extern ddNode* cdd_extract_bdd(ddNode* cdd, raw_t* dbm, int32_t dim);
+
+
 
 /**
  * Extract a zone from a CDD.  This function will extract a zone from
@@ -852,9 +876,11 @@ private:
     friend cdd cdd_intervalpp(int, int, raw_t, raw_t);
     friend cdd cdd_bddvarpp(int);
     friend cdd cdd_bddnvarpp(int);
+    friend cdd cdd_remove_negative(const cdd& node);
+
     friend cdd cdd_exist(const cdd&, int32_t*, int32_t*);
     friend cdd cdd_replace(const cdd&, int32_t*, int32_t*);
-    friend cdd cdd_restrict(const cdd&, int32_t*, int32_t*);
+    friend cdd cdd_restrict(const cdd&, int32_t, int32_t);
     friend int32_t cdd_nodecount(const cdd&);
     friend cdd cdd_apply(const cdd&, const cdd&, int);
     friend cdd cdd_apply_reduce(const cdd&, const cdd&, int);
@@ -865,6 +891,7 @@ private:
     friend bool cdd_contains(const cdd&, raw_t* dbm, int32_t dim);
     friend bool  cdd_contains_metafed(const cdd& c, raw_t* dbm, int32_t dim,  bool state[], int32_t bdd_start_level, int32_t index, bool negated);
     friend cdd cdd_extract_dbm(const cdd&, raw_t* dbm, int32_t dim);
+    friend cdd cdd_extract_bdd(const cdd&, raw_t* dbm, int32_t dim);
     friend cdd cdd_extract_dbm_and_bdd(const cdd&, raw_t* dbm, int32_t dim, cdd&);
     friend void cdd_fprintdot(FILE* ofile, const cdd&, bool push_negate);
     friend void cdd_printdot(const cdd&, bool push_negate);
@@ -945,6 +972,18 @@ inline cdd cdd_lowerpp(int32_t i, int32_t j, raw_t bound)
 
 
 /**
+ * Interprate the CDD as clock values, and remove any negative
+ * clock values.
+ * @param the original cdd
+ * @return a cdd that does not contain negative value
+ */
+inline cdd cdd_remove_negative(const cdd& node)
+{
+    return cdd(cdd_remove_negative(node.handle()));
+}
+
+
+/**
  * checks for equivalence between two cdds
  */
 inline bool  cdd_equiv(const cdd& l, const cdd& r)
@@ -1009,7 +1048,7 @@ inline cdd cdd_exist(const cdd& r, int32_t* levels, int32_t* clocks)
 /**
  * Restricts the boolean variable at the given level in the BDD according to the provided value
  */
-inline cdd cdd_restrict(const cdd& r, int32_t* bdd_var_level, int32_t* assignment)
+inline cdd cdd_restrict(const cdd& r, int32_t bdd_var_level, int32_t assignment)
 {
 
     return cdd(cdd_restrict(r.root, bdd_var_level, assignment));
@@ -1085,6 +1124,19 @@ inline cdd cdd_extract_dbm(const cdd& r, raw_t* dbm, int32_t dim)
 {
     return cdd(cdd_extract_dbm(r.root, dbm, dim));
 }
+
+
+/**
+ * Extract the bottom BDD of the first DBM in a given CDD
+ * @param cdd a cdd
+ * @param dbm a dbm
+ * @return the difference between \a cdd and \a dbm
+ */
+inline cdd cdd_extract_bdd(const cdd& r, raw_t* dbm, int32_t dim)
+{
+    return cdd(cdd_extract_bdd(r.root, dbm, dim));
+}
+
 
 /**
  * Extract a zone from a CDD.  This function will extract a zone from
