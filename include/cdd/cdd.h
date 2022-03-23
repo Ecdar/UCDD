@@ -270,6 +270,16 @@ extern void cdd_ensure_running();
 extern int32_t cdd_add_bddvar(int32_t n);
 
 /**
+ * Interprate the CDD as clock values, and remove any negative
+ * clock values.
+ * @param the original cdd
+ * @return a cdd that does not contain negative value
+ */
+extern ddNode* cdd_remove_negative(ddNode* node);
+
+
+
+/**
  * Declares a number of clock variables. The library maintains a list
  * of boolean and clock variables. This functions adds more clock
  * variables to this list. Since CDD nodes describe differences
@@ -330,6 +340,12 @@ extern int32_t cdd_get_number_of_tautologies();
  * @return the number of levels
  */
 extern int32_t cdd_get_level_count();
+
+/**
+ * checks for equivalence between two cdds
+ */
+extern  int32_t cdd_equiv(ddNode* c, ddNode* d);
+
 
 /**
  * Returns the number of BDD levels.
@@ -481,6 +497,13 @@ extern ddNode* cdd_interval(int32_t i, int32_t j, raw_t lower, raw_t upper);
 extern ddNode* cdd_bddvar(int32_t level);
 
 /**
+ * Hopefully pushes negation down through the whole CDD structure
+ * @param node the node from where on the negation should be propagated
+ * @return the resulting negated node
+ */
+extern ddNode* cdd_push_negate(ddNode* node);
+
+/**
  * Performs a binary operation on two decision diagrams.
  * @param left  the left argument to the operation
  * @param right the right argument to the operation
@@ -559,6 +582,17 @@ extern ddNode* cdd_reduce2(ddNode*);
  */
 extern int32_t cdd_contains(ddNode* cdd, raw_t* dbm, int32_t dim);
 
+
+/**
+ * Returns true if \a metafederaion is included in a CBDD.
+ * @param cdd a cbdd
+ * @param dbm a dbm
+ * @param dbm a boolean state
+ * @return true if \a dbm is included in \a cdd
+ */
+
+extern int32_t cdd_contains_metafed(ddNode* node, raw_t* dbm, int32_t dim,  bool state[], int32_t bdd_start_level, int32_t index, bool negated);
+
 /**
  * Convert a DBM to a CDD. It is important that the indexes of the DBM
  * correspond to clocks in the CDD library.
@@ -571,11 +605,28 @@ extern ddNode* cdd_from_dbm(const raw_t* dbm, int32_t dim);
  * Extract a zone from a CDD.  This function will extract a zone from
  * \a cdd and write it to \a dbm.  It will return a CDD equivalent to
  * \a cdd \ \c cdd_from_dbm(dbm).
+ * PRECONDITION: call CDD reduce first!!!
  * @param cdd a cdd
  * @param dbm a dbm
  * @return the difference between \a cdd and \a dbm
  */
 extern ddNode* cdd_extract_dbm(ddNode* cdd, raw_t* dbm, int32_t dim);
+
+
+/**
+ * Extract a BDD from the botten of a given CDD
+ * \a cdd and write it to \a dbm.  It will return a CDD equivalent to
+ * \a cdd \ \c cdd_from_dbm(dbm).
+ * PRECONDITION: call CDD reduce first!!!
+ * @param cdd a cdd
+ * @param dbm a dbm
+ * @return the difference between \a cdd and \a dbm
+ */
+extern ddNode* cdd_extract_bdd(ddNode* cdd, raw_t* dbm, int32_t dim);
+
+
+
+
 
 /**
  * Print a CDD \a r as a dot input file \a ofile. You can use the dot
@@ -584,14 +635,14 @@ extern ddNode* cdd_extract_dbm(ddNode* cdd, raw_t* dbm, int32_t dim);
  * @param ofile the file to write to.
  * @param cdd   a CDD.
  */
-extern void cdd_fprintdot(FILE* ofile, ddNode* cdd);
+extern void cdd_fprintdot(FILE* ofile, ddNode* cdd, bool push_negate);
 
 /**
  * Print a CDD \a r as a dot input file to stdout.
  * @see cdd_fprintdot
  * @param cdd   a CDD.
  */
-extern void cdd_printdot(ddNode* cdd);
+extern void cdd_printdot(ddNode* cdd, bool push_negate);
 
 /**
  * Dump all the CDD nodes.
@@ -810,6 +861,8 @@ private:
     friend cdd cdd_intervalpp(int, int, raw_t, raw_t);
     friend cdd cdd_bddvarpp(int);
     friend cdd cdd_bddnvarpp(int);
+    friend cdd cdd_remove_negative(const cdd& node);
+
     friend cdd cdd_exist(const cdd&, int32_t*, int32_t*);
     friend cdd cdd_replace(const cdd&, int32_t*, int32_t*);
     friend int32_t cdd_nodecount(const cdd&);
@@ -817,11 +870,14 @@ private:
     friend cdd cdd_apply_reduce(const cdd&, const cdd&, int);
     friend cdd cdd_ite(const cdd&, const cdd&, const cdd&);
     friend cdd cdd_reduce(const cdd&);
+    friend bool cdd_equiv(const cdd&, const cdd&);
     friend cdd cdd_reduce2(const cdd&);
     friend bool cdd_contains(const cdd&, raw_t* dbm, int32_t dim);
+    friend bool  cdd_contains_metafed(const cdd& c, raw_t* dbm, int32_t dim,  bool state[], int32_t bdd_start_level, int32_t index, bool negated);
     friend cdd cdd_extract_dbm(const cdd&, raw_t* dbm, int32_t dim);
-    friend void cdd_fprintdot(FILE* ofile, const cdd&);
-    friend void cdd_printdot(const cdd&);
+    friend cdd cdd_extract_bdd(const cdd&, raw_t* dbm, int32_t dim);
+    friend void cdd_fprintdot(FILE* ofile, const cdd&, bool push_negate);
+    friend void cdd_printdot(const cdd&, bool push_negate);
     friend void cdd_fprint_code(FILE* ofile, const cdd&, cdd_print_varloc_f printer1,
                                 cdd_print_clockdiff_f printer2, void* dict);
     friend void cdd_fprint_graph(FILE* ofile, const cdd&, cdd_print_varloc_f printer1,
@@ -845,6 +901,19 @@ private:
 inline bool cdd_contains(const cdd& c, raw_t* dbm, int32_t dim)
 {
     return cdd_contains(c.root, dbm, dim);
+}
+
+
+/**
+ * Returns true if \a metafederaion is included in a CBDD.
+ * @param cdd a cbdd
+ * @param dbm a dbm
+ * @param dbm a boolean state
+ * @return true if \a dbm is included in \a cdd
+ */
+inline bool  cdd_contains_metafed(const cdd& c, raw_t* dbm, int32_t dim,  bool state[], int32_t bdd_start_level, int32_t index, bool negated)
+{
+    return cdd_contains_metafed(c, dbm, dim, state, bdd_start_level, index, negated);
 }
 
 /**
@@ -883,6 +952,28 @@ inline cdd cdd_lowerpp(int32_t i, int32_t j, raw_t bound)
 {
     return cdd(cdd_neg(cdd_upper(i, j, bound)));
 }
+
+
+/**
+ * Interprate the CDD as clock values, and remove any negative
+ * clock values.
+ * @param the original cdd
+ * @return a cdd that does not contain negative value
+ */
+inline cdd cdd_remove_negative(const cdd& node)
+{
+    return cdd(cdd_remove_negative(node.handle()));
+}
+
+
+/**
+ * checks for equivalence between two cdds
+ */
+inline bool  cdd_equiv(const cdd& l, const cdd& r)
+{
+    return cdd_equiv(l.root,r.root);
+}
+
 
 /**
  * Creates a new CDD node corresponding to the constraint \a lower
@@ -936,6 +1027,7 @@ inline cdd cdd_exist(const cdd& r, int32_t* levels, int32_t* clocks)
 {
     return cdd(cdd_exist(r.root, levels, clocks));
 }
+
 
 /**
  * Variable substitution.
@@ -1007,6 +1099,20 @@ inline cdd cdd_extract_dbm(const cdd& r, raw_t* dbm, int32_t dim)
     return cdd(cdd_extract_dbm(r.root, dbm, dim));
 }
 
+
+/**
+ * Extract the bottom BDD of the first DBM in a given CDD
+ * @param cdd a cdd
+ * @param dbm a dbm
+ * @return the difference between \a cdd and \a dbm
+ */
+inline cdd cdd_extract_bdd(const cdd& r, raw_t* dbm, int32_t dim)
+{
+    return cdd(cdd_extract_bdd(r.root, dbm, dim));
+}
+
+
+
 /**
  * Print a CDD \a r as a dot input file \a ofile. You can use the dot
  * program from the graphwiz package to convert this to a PS picture
@@ -1014,14 +1120,14 @@ inline cdd cdd_extract_dbm(const cdd& r, raw_t* dbm, int32_t dim)
  * @param ofile the file to write to.
  * @param cdd   a CDD.
  */
-inline void cdd_fprintdot(FILE* ofile, const cdd& cdd) { cdd_fprintdot(ofile, cdd.root); }
+inline void cdd_fprintdot(FILE* ofile, const cdd& cdd, bool push_negate) { cdd_fprintdot(ofile, cdd.root, push_negate); }
 
 /**
  * Print a CDD \a r as a dot input file to stdout.
  * @see cdd_fprintdot
  * @param cdd   a CDD.
  */
-inline void cdd_printdot(const cdd& cdd) { cdd_printdot(cdd.root); }
+inline void cdd_printdot(const cdd& cdd, bool push_negate) { cdd_printdot(cdd.root, push_negate); }
 
 /**
  * Another way of printing a BCDD
