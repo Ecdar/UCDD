@@ -406,9 +406,9 @@ static int32_t cdd_contains_rec(ddNode* node, raw_t* d, int32_t dim)
         free(tmp);
         break;
     case TYPE_BDD:
-        if (!cdd_contains_rec(bdd_node(node)->low, d, dim))
-            return 0;
-        if (!cdd_contains_rec(bdd_node(node)->high, d, dim))
+        if (cdd_contains_rec(bdd_node(node)->low, d, dim) | cdd_contains_rec(bdd_node(node)->high, d, dim))
+            return 1;
+        else
             return 0;
         break;
     }
@@ -866,8 +866,7 @@ static ddNode* cdd_exist_rec(ddNode* node, int32_t* levels, int32_t* clocks, raw
 
         tmp2 = cdd_exist_rec(bdd_high(node), levels, clocks, rc);
         cdd_ref(tmp2);
-
-        if (levels[cdd_rglr(node)->level]) {
+        if (levels[bdd_node(node)->level]) {  //TODO: check if the regularize here really was ment to be removed        //if (levels[cdd_rglr(node)->level]) { /TODO make the array start at bdd_lvl_count
             res = cdd_or(tmp1, tmp2);
             cdd_ref(res);
         } else {
@@ -1098,6 +1097,18 @@ ddNode* cdd_from_dbm(const raw_t* dbm, int32_t size)
 }
 #endif
 
+ddNode* cdd_remove_negative(ddNode* cdd)
+{
+    ddNode* result = cdd;
+    for (int i=1; i<cdd_clocknum; i++)
+    {
+        result = cdd_apply(result, cdd_interval(i, 0, 0, dbm_LS_INFINITY), cddop_and);
+    }
+    return result;
+}
+
+
+
 ddNode* cdd_extract_dbm(ddNode* cdd, raw_t* dbm, int32_t size)
 {
     cdd_iterator it;
@@ -1116,6 +1127,11 @@ ddNode* cdd_extract_dbm(ddNode* cdd, raw_t* dbm, int32_t size)
 
     while (!cdd_isterminal(node)) {
         info = cdd_info(node);
+
+        if (info->type == TYPE_BDD) {
+            break;
+        }
+        assert(info->type != TYPE_BDD);
 
         assert(info->clock1 < size);
         assert(info->clock2 < size);
@@ -1149,6 +1165,56 @@ ddNode* cdd_extract_dbm(ddNode* cdd, raw_t* dbm, int32_t size)
 
     return result;
 }
+
+
+
+ddNode* cdd_extract_bdd(ddNode* cdd, raw_t* dbm, int32_t size) {
+    cdd_iterator it;
+    LevelInfo *info;
+    ddNode *node, *zone, *result;
+    uint32_t touched[bits2intsize(size)];
+
+    node = cdd;
+
+    dbm_init(dbm, size);
+    // dbm_print(stdout, dbm, size);
+
+    base_resetBits(touched, bits2intsize(size));
+
+    while (!(cdd_isterminal(node))) {
+        info = cdd_info(node);
+        if (info->type == TYPE_BDD) {
+           return (node);
+        }
+        assert(info->type != TYPE_BDD);
+
+        assert(info->clock1 < size);
+        assert(info->clock2 < size);
+
+        cdd_it_init(it, node);
+        if (IS_FALSE(cdd_it_child(it))) {
+            cdd_it_next(it);
+        }
+
+        assert(cdd_it_child(it) != cddfalse);
+
+        if (info->type != TYPE_BDD) {
+           // dbm_constrain(dbm, size, info->clock2, info->clock1, bnd_l2u(cdd_it_lower(it)), touched);
+
+           // dbm_constrain(dbm, size, info->clock1, info->clock2, cdd_it_upper(it), touched);
+        }
+        node = cdd_it_child(it);
+    }
+
+    return cddtrue;
+}
+
+
+
+
+
+
+
 
 void cdd_mark_clock(int32_t* vec, int32_t c)
 {
@@ -1189,7 +1255,7 @@ static ddNode* add_bound(ddNode* c, int32_t level, raw_t low, raw_t up)
     return tmp2;
 }
 
-static int32_t equiv(ddNode* c, ddNode* d)
+ int32_t cdd_equiv(ddNode* c, ddNode* d)
 {
     ddNode* tmp1;
     ddNode* tmp2;
@@ -1252,7 +1318,7 @@ static ddNode* cdd_reduce2_rec(ddNode* node)
             cdd_ref(join);
 
             /* Are they equivalent ? */
-            if (equiv(split, join)) {
+            if (cdd_equiv(split, join)) {
                 /* Yes, use the union as the new prev */
                 cdd_rec_deref(prev);
                 prev = tmp1;

@@ -9,7 +9,21 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <malloc.h>
 #include "cdd/kernel.h"
+
+uint32_t printCounter1 = 0; // Used to number printed CDDs
+
+static void print_cdd(cdd to_print, char *name, bool push_negate) {
+    char filename[30];
+    sprintf(filename, "%s_%d.dot", name, printCounter1);
+    printf("Printing cdd %s to file : \n", name);
+    FILE *fp_main;
+    fp_main = fopen(filename, "w");
+    cdd_fprintdot(fp_main, to_print, push_negate);
+    fclose(fp_main);
+    printCounter1++;
+}
 
 cdd::cdd(const cdd& r)
 {
@@ -53,4 +67,118 @@ cdd cdd::operator=(ddNode* node)
         cdd_ref(root);
     }
     return *this;
+}
+
+#define ADBM(NAME)  raw_t* NAME = allocDBM(size)
+
+/* allocate a DBM
+ */
+static raw_t* allocDBM(uint32_t dim) { return (raw_t*)malloc(dim * dim * sizeof(raw_t)); }
+
+
+cdd cdd_delay(const cdd& state)
+{
+    uint32_t size = cdd_clocknum;
+    cdd copy= state;
+    cdd res= cdd_false();
+    ADBM(dbm);
+    while (!cdd_isterminal(copy.root) && cdd_info(copy.root)->type != TYPE_BDD) {
+        copy = cdd_reduce(copy);
+        cdd bottom = cdd_extract_bdd(copy, dbm, size);
+        copy = cdd_extract_dbm(copy, dbm, size);
+        copy = cdd_reduce(copy);
+        dbm_up(dbm, size);
+        cdd fixed_cdd = cdd(dbm,size);
+        fixed_cdd &= bottom;
+        res |= fixed_cdd;
+    }
+    return res;
+}
+
+
+cdd cdd_delay_invariant(const cdd& state, const cdd& invar)
+{
+    cdd res = cdd_delay(state);
+    res &= invar;
+    return res;
+}
+
+cdd cdd_past(const cdd& state)
+{
+    uint32_t size = cdd_clocknum;
+    cdd copy= state;
+    cdd res= cdd_false();
+    ADBM(dbm);
+    while (!cdd_isterminal(copy.handle()) && cdd_info(copy.handle())->type != TYPE_BDD) {
+        copy = cdd_reduce(copy);
+        cdd bottom = cdd_extract_bdd(copy, dbm, size);
+        copy = cdd_extract_dbm(copy, dbm, size);
+        copy = cdd_reduce(copy);
+        dbm_down(dbm, size);
+        res |= (cdd(dbm,size) & bottom);
+    }
+    return res;
+}
+
+
+
+
+
+cdd cdd_transition(const cdd& state, const cdd& guard, int32_t* clock_resets, int32_t* clock_values, int32_t* bool_resets, int32_t* bool_values, int32_t bdd_start_level )
+{
+    uint32_t size = cdd_clocknum;
+    ADBM(dbm);
+    cdd copy= state;
+    copy &= guard;
+    copy = cdd_exist(copy, bool_resets, clock_resets);
+    // Hint: if this quantifies a clock, the resulting CDD will include negative clock values
+
+    for (int i=bdd_start_level;i<bdd_start_level+cdd_varnum; i++)
+    {
+        if (bool_resets[i] == 1) {
+            if (bool_values[i]==1) {
+                copy = cdd_apply(copy, cdd_bddvarpp(i), cddop_and);
+            }
+            else
+            {
+                copy = cdd_apply(copy, cdd_bddnvarpp(i), cddop_and);
+            }
+        }
+    }
+
+    cdd res= cdd_false();
+    while (!cdd_isterminal(copy.root) && cdd_info(copy.root)->type != TYPE_BDD) {
+        copy = cdd_remove_negative(copy);
+        copy = cdd_reduce(copy);
+        cdd bottom = cdd_extract_bdd(copy, dbm, size);
+        copy = cdd_extract_dbm(copy, dbm, size);
+        for (int i = 0; i < cdd_clocknum; i++) {
+            if (clock_resets[i] == 1) {
+                dbm_updateValue(dbm, size, i , clock_values[i]);
+            }
+        }
+        res |= (cdd(dbm,size) & bottom);
+    }
+    return res;
+}
+
+cdd cdd_transition_back(const cdd&  state, const cdd& guard, const cdd& update, int32_t* clock_resets, int32_t* bool_resets)
+{
+    cdd copy= state;
+    // TODO: sanity check: implement cdd_is_update();
+    // assert(ccd_is_update(update));
+    copy &= update;
+    if (copy == cdd_false()) {
+        return copy;
+    }
+    copy = cdd_exist(copy, bool_resets, clock_resets);
+    copy = cdd_remove_negative(copy);
+    copy &= guard;
+    return copy;
+}
+
+cdd cdd_transition_back_past(const cdd&  state, const cdd& guard, const cdd& update, int32_t* clock_resets, int32_t* bool_resets)
+{
+    cdd result = cdd_transition_back(state,guard, update, clock_resets,bool_resets);
+    return cdd_past(result);
 }

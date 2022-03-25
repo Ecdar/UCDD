@@ -620,28 +620,6 @@ static cdd buildCDDWithBooleansTest(size_t size, int number_of_DBMs, int number_
         assert(dbm_isValid(dbm, size));
         cdd_result |= cdd(dbm, size);
     }
-
-/*
-    for (int i = 0; i < number_of_booleans; i++) {
-
-
-        if (rand() < RAND_MAX/2) {
-            printf("Random is working");
-            cdd new_cdd = cdd_bddvarpp(bdd_start_level + i);
-            print_cdd(new_cdd, "non_negated");
-            cdd_result |= new_cdd;
-        } else  {
-            printf("Random is NOT working");
-
-            cdd new_cdd = cdd_bddnvarpp(bdd_start_level + i);
-            print_cdd(new_cdd, "negated");
-            cdd_result |= new_cdd;
-        }
-
-
-    }
-    */
-
     cdd b1 = cdd_bddvarpp(bdd_start_level + 0);
     cdd b2 = cdd_bddvarpp(bdd_start_level + 1);
     cdd b3 = cdd_bddvarpp(bdd_start_level + 2);
@@ -1275,14 +1253,16 @@ int main(int argc, char *argv[]) {
     int bdd_start_level = cdd_add_bddvar(number_of_booleans);
     cdd cdd_main;
 
-    for (int i = 1; i <= 1; i++) {
+    for (int i = 1; i <= 5; i++) {
         printf("running tests with seed %i\n", i);
         srand(i); //
+        printf("Running the tests \n");
+
         traverseTransitionTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
         delayTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
         downTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
 
-/*
+
 
         extractEdgeCasesTest(number_of_clocks_including_zero, bdd_start_level);
 
@@ -1308,7 +1288,7 @@ int main(int argc, char *argv[]) {
         cdd_main = buildCDDWithBooleansTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
         cdd_main = buildSimpleStaticBDD(bdd_start_level);
         cdd_main = MartijnTest(bdd_start_level);
-*/
+
 
         printf("finished tests with seed %i\n", i);
 
