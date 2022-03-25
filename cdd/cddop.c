@@ -923,12 +923,9 @@ static ddNode* cdd_exist_rec(ddNode* node, int32_t* levels, int32_t* clocks, raw
     res = NULL;
     switch (info->type) {
     case TYPE_CDD:
-        printf("ccd node\n");
         res = cddfalse;
         cdd_it_init(it, node);
         if (clocks[info->clock1] || clocks[info->clock2]) {
-
-            printf("in clocks\n");
             while (!cdd_it_atend(it)) {
                 // Here we add the constraint32_t to rc - we save the old
                 // constraints so they can be restored.
@@ -961,7 +958,6 @@ static ddNode* cdd_exist_rec(ddNode* node, int32_t* levels, int32_t* clocks, raw
                 cdd_it_next(it);
             }
         } else {
-            printf("not in clocks\n");
             while (!cdd_it_atend(it)) {
                 tmp1 = cdd_interval_from_level(cdd_rglr(node)->level, cdd_it_lower(it),
                                                cdd_it_upper(it));
@@ -993,7 +989,6 @@ static ddNode* cdd_exist_rec(ddNode* node, int32_t* levels, int32_t* clocks, raw
 
         tmp2 = cdd_exist_rec(bdd_high(node), levels, clocks, rc);
         cdd_ref(tmp2);
-        printf("node level %i", cdd_rglr(node)->level);
         if (levels[bdd_node(node)->level]) {          //if (levels[cdd_rglr(node)->level]) { /TODO make the array start at bdd_lvl_count
             res = cdd_or(tmp1, tmp2);
             cdd_ref(res);
@@ -1251,7 +1246,7 @@ ddNode* cdd_extract_dbm(ddNode* cdd, raw_t* dbm, int32_t size)
     node = cdd;
 
     dbm_init(dbm, size);
-    // dbm_print(stdout, dbm, size);
+     dbm_print(stdout, dbm, size);
 
     base_resetBits(touched, bits2intsize(size));
 
@@ -1259,7 +1254,6 @@ ddNode* cdd_extract_dbm(ddNode* cdd, raw_t* dbm, int32_t size)
         info = cdd_info(node);
         // TODO: Fix the BDDs here correctly
         if (info->type == TYPE_BDD) {
-            printf("BDD Node reached\n");
             break;
         }
         assert(info->type != TYPE_BDD);
@@ -1279,6 +1273,9 @@ ddNode* cdd_extract_dbm(ddNode* cdd, raw_t* dbm, int32_t size)
 
             dbm_constrain(dbm, size, info->clock1, info->clock2, cdd_it_upper(it), touched);
         }
+
+        dbm_print(stdout, dbm, size);
+        printf("\n");
         node = cdd_it_child(it);
     }
     dbm_closex(dbm, size, touched);
@@ -1336,10 +1333,6 @@ ddNode* cdd_extract_bdd(ddNode* cdd, raw_t* dbm, int32_t size) {
 
     return cddtrue;
 }
-
-
-
-
 
 
 

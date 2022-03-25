@@ -889,7 +889,8 @@ static inline void base_resetBits(uint32_t* bits, size_t n)
         *bits++ = 0;
 }
 
-void traverseTransitionTest(size_t size, int number_of_DBMs, int32_t number_of_booleans, int32_t bdd_start_level) {
+
+void delayTest(size_t size, int number_of_DBMs, int32_t number_of_booleans, int32_t bdd_start_level) {
     cdd b6 = cdd_bddvarpp(bdd_start_level + 0);
     cdd b7 = cdd_bddvarpp(bdd_start_level + 1);
     cdd b8 = cdd_bddvarpp(bdd_start_level + 2);
@@ -914,6 +915,68 @@ void traverseTransitionTest(size_t size, int number_of_DBMs, int32_t number_of_b
 
     cdd guard = left | right;
     cdd stateAfterGuard = stateBeforeTrans & guard;
+    stateAfterGuard = cdd_reduce(stateAfterGuard);
+    cdd_delay(stateAfterGuard);
+}
+
+
+void downTest(size_t size, int number_of_DBMs, int32_t number_of_booleans, int32_t bdd_start_level) {
+    cdd b6 = cdd_bddvarpp(bdd_start_level + 0);
+    cdd b7 = cdd_bddvarpp(bdd_start_level + 1);
+    cdd b8 = cdd_bddvarpp(bdd_start_level + 2);
+    cdd b9 = cdd_bddvarpp(bdd_start_level + 3);
+    cdd stateBeforeTrans = cdd_true();
+
+    // Assume we start in an unconstrained state, with three clocks and 4 boolean variables
+    // We take a transition with guard (x1>5 && b6==true) | (x2<4 && b7==false)
+    cdd left = cdd_intervalpp(1, 0, strict(5), dbm_LS_INFINITY);
+    left &= cdd_interval(2, 0, 0, dbm_LS_INFINITY);
+    left &= cdd_interval(3, 0, 0, dbm_LS_INFINITY);
+    left &= b6;
+    print_cdd(left, "left", true);
+    cdd right = cdd_intervalpp(2, 0, 0, strict(4));
+    right &= cdd_interval(1, 0, 0, dbm_LS_INFINITY);
+    right &= cdd_interval(3, 0, 0, dbm_LS_INFINITY);
+    right &= !b7;
+    print_cdd(right, "right", true);
+    left = cdd_reduce(left);
+    right = cdd_reduce(right);
+    print_cdd(right, "rightRed", true);
+
+    cdd guard = left | right;
+    cdd stateAfterGuard = stateBeforeTrans & guard;
+    stateAfterGuard = cdd_reduce(stateAfterGuard);
+    cdd_past(stateAfterGuard);
+}
+
+
+
+
+void traverseTransitionTest(size_t size, int number_of_DBMs, int32_t number_of_booleans, int32_t bdd_start_level) {
+    cdd b6 = cdd_bddvarpp(bdd_start_level + 0);
+    cdd b7 = cdd_bddvarpp(bdd_start_level + 1);
+    cdd b8 = cdd_bddvarpp(bdd_start_level + 2);
+    cdd b9 = cdd_bddvarpp(bdd_start_level + 3);
+    cdd stateBeforeTrans = cdd_true();
+
+    // Assume we start in an unconstrained state, with three clocks and 4 boolean variables
+    // We take a transition with guard (x1>5 && b6==true) | (x2<4 && b7==false)
+    cdd left = cdd_intervalpp(1, 0, strict(5), dbm_LS_INFINITY);
+    left &= cdd_intervalpp(2, 0, 0, dbm_LS_INFINITY);
+    left &= cdd_intervalpp(3, 0, 0, dbm_LS_INFINITY);
+    left &= b6;
+    print_cdd(left, "left", true);
+    cdd right = cdd_intervalpp(2, 0, 0, strict(4));
+    right &= cdd_intervalpp(1, 0, 0, dbm_LS_INFINITY);
+    right &= cdd_intervalpp(3, 0, 0, dbm_LS_INFINITY);
+    right &= !b7;
+    print_cdd(right, "right", true);
+    left = cdd_reduce(left);
+    right = cdd_reduce(right);
+    print_cdd(right, "rightRed", true);
+
+    cdd guard = left | right;
+    cdd stateAfterGuard = stateBeforeTrans & guard;
     stateAfterGuard= cdd_reduce(stateAfterGuard);
     print_cdd(stateAfterGuard, "afterGuard", true);
 
@@ -930,44 +993,64 @@ void traverseTransitionTest(size_t size, int number_of_DBMs, int32_t number_of_b
     print_cdd(stateAfterBool, "afterBoolReset", true);
     // 2. apply the clock update
     cdd rebuilt = cdd_false();
-    cdd rebuilt_second_approach = cdd_false();
     cdd stateAfterBool_second_approach = stateAfterBool;
     ADBM(dbm);
     cdd cdd_at_bottom;
     while (!cdd_isterminal(stateAfterBool.handle()) && cdd_info(stateAfterBool.handle())->type != TYPE_BDD) {
-
         stateAfterBool = cdd_reduce(stateAfterBool);
         cdd_at_bottom = cdd_extract_bdd(stateAfterBool, dbm, size);
         print_cdd(cdd_at_bottom, "cdd_at_bottom", true);
         stateAfterBool = cdd_extract_dbm(stateAfterBool, dbm, size);
-
         print_cdd(stateAfterBool, "beforeReduce", true);
         stateAfterBool = cdd_reduce(stateAfterBool);
         print_cdd(stateAfterBool, "extractedOneDBM", true);
         dbm_updateValue(dbm,size,1,0);
-        dbm_up(dbm,size);
         rebuilt |= (cdd(dbm, size) & cdd_at_bottom);
         print_cdd(rebuilt, "resultOfCurrentIteration", true);
-/*
-        // second approach
-        cdd cdd_at_bottom_second_approach;
-        ADBM(dbm1);
-        printf("0 \n");
-        stateAfterBool_second_approach = cdd_reduce(stateAfterBool_second_approach);
-        printf("1 \n");
-        stateAfterBool_second_approach = cdd_extract_dbm_and_bdd(stateAfterBool_second_approach, dbm1, size, cdd_at_bottom_second_approach);
-        printf("2 \n");
-        print_cdd(stateAfterBool_second_approach, "extractedOneDBM_second_approach", true);
-        stateAfterBool_second_approach = cdd_reduce(stateAfterBool_second_approach);
-        print_cdd(stateAfterBool_second_approach, "extractedOneDBM_second_approach", true);
-        dbm_updateValue(dbm1,size,1,0);
-        dbm_up(dbm1,size);
-        rebuilt_second_approach |= (cdd(dbm1, size) & cdd_at_bottom_second_approach);
-        print_cdd(rebuilt_second_approach, "resultOfCurrentIteration_second_approach", true);
-        */
+
     }
-//    assert(cdd_equiv(rebuilt,rebuilt_second_approach));
+
+    cdd stateBeforeTrans_second_approach = cdd_true();
+    int arr2[4] = {-1,-1,-1,-1};
+    arr2[1] = 0;
+
+    int *clockValPtr = arr2;
+    int arr3[5+6] = {0,0,0,0,0,0,0,0,0,0,0};
+    arr3[bdd_start_level + 1] = 1;
+    arr[1] = 1;
+    int *boolValPtr = arr3;
+    cdd stateAfterTrans = cdd_transition(stateBeforeTrans_second_approach,guard,clockPtr,clockValPtr,boolPtr, boolValPtr, bdd_start_level);
+
+
+    print_cdd(rebuilt, "resultOfCurrentIteration", true);
+    print_cdd(stateAfterTrans, "stateAfterTrans", true);
+    assert(cdd_equiv(rebuilt,stateAfterTrans));
+
+
+
+
+    // We take a transition with guard (x1>5 && b6==true) | (x2<4 && b7==false)
+    // the transition has an update of x1=0 & b7=true
+    cdd update = cdd_true();
+    update &= cdd_intervalpp(1, 0, nstrict(0), nstrict(0));
+    update &= b7;
+    cdd stateAfterBackTrans = cdd_transition_back(cdd_true(),guard,update, clockPtr,boolPtr);
+
+
+    print_cdd(stateAfterBackTrans, "stateAfterBackTrans", true);
+    print_cdd(guard, "guard", true);
+
+
+    assert(cdd_equiv(guard,stateAfterBackTrans));
+
+    stateAfterBackTrans = cdd_past(stateAfterBackTrans);
+    print_cdd(stateAfterBackTrans, "stateAfterDown", true);
+
 }
+
+
+
+
 
 
 // functions we want to expose:
@@ -1192,10 +1275,13 @@ int main(int argc, char *argv[]) {
     int bdd_start_level = cdd_add_bddvar(number_of_booleans);
     cdd cdd_main;
 
-    for (int i = 2244; i <= 3000; i++) {
+    for (int i = 1; i <= 1; i++) {
         printf("running tests with seed %i\n", i);
         srand(i); //
-        test_reduce(number_of_clocks_including_zero);
+        traverseTransitionTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
+        delayTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
+        downTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
+
 /*
 
         extractEdgeCasesTest(number_of_clocks_including_zero, bdd_start_level);
@@ -1203,6 +1289,7 @@ int main(int argc, char *argv[]) {
         existTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
         traverseTransitionTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
         inputEnableTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
+        test_reduce(number_of_clocks_including_zero);
 
 
         orExactractWithBddTest(4, bdd_start_level); // hard coded number of clocks needed to the the use ot cdd_interval

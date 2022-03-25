@@ -347,6 +347,7 @@ extern int32_t cdd_get_level_count();
 extern  int32_t cdd_equiv(ddNode* c, ddNode* d);
 
 
+
 /**
  * Returns the number of BDD levels.
  */
@@ -871,6 +872,14 @@ private:
     friend cdd cdd_ite(const cdd&, const cdd&, const cdd&);
     friend cdd cdd_reduce(const cdd&);
     friend bool cdd_equiv(const cdd&, const cdd&);
+
+    friend cdd cdd_delay(const cdd&);
+    friend cdd cdd_past(const cdd&);
+    friend cdd cdd_delay_invariant(const cdd&, const cdd&);
+    friend cdd cdd_transition(const cdd& state, const cdd& guard, int32_t* clock_resets, int32_t* clock_values, int32_t* bool_resets, int32_t* bool_values, int32_t bdd_start_level );
+    friend cdd cdd_transition_back(const cdd& state, const cdd& guard, const cdd& update, int32_t* clock_resets,  int32_t* bool_resets);
+    friend cdd cdd_transition_back_past(const cdd& state, const cdd& guard, const cdd& update, int32_t* clock_resets,  int32_t* bool_resets);
+
     friend cdd cdd_reduce2(const cdd&);
     friend bool cdd_contains(const cdd&, raw_t* dbm, int32_t dim);
     friend bool  cdd_contains_metafed(const cdd& c, raw_t* dbm, int32_t dim,  bool state[], int32_t bdd_start_level, int32_t index, bool negated);
