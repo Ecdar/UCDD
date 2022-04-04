@@ -418,6 +418,7 @@ extern int32_t* cdd_diff2level;
 extern Elem* cdd_refstack;
 extern Elem* cdd_refstacktop;  ///< Reference stack
 extern size_t cdd_refstacksize;
+extern int32_t bdd_start_level;
 extern int32_t cdd_clocknum;  ///< Number of clocks
 extern int32_t cdd_varnum;    ///< Number of BDD variables
 extern int32_t cdd_levelcnt;  ///< Number of levels

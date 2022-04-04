@@ -96,19 +96,49 @@ cdd cdd_delay(const cdd& state)
 }
 
 
-extraction_result cdd_extract_dbm_and_bdd(const cdd& state)
+extraction_result cdd_extract_bdd_and_dbm(const cdd& state)
 {
     uint32_t size = cdd_clocknum;
     ADBM(dbm);
     cdd bdd_part = cdd_extract_bdd(state, dbm, size);
     cdd cdd_part = cdd_extract_dbm(state, dbm, size);
     extraction_result res;
-    res.BDD_part=&bdd_part;
-    res.CDD_part=&cdd_part;
+    res.BDD_part=bdd_part;
+    res.CDD_part=cdd_part;
     res.dbm=dbm;
     return res;
 }
 
+
+cdd cdd_predt(const cdd&  target, const cdd&  safe)
+{
+    cdd allThatKillsUs = cdd_false();
+    uint32_t size = cdd_clocknum;
+    cdd copy = target;
+    ADBM(dbm);
+    while (!cdd_isterminal(copy.handle()) && cdd_info(copy.handle())->type != TYPE_BDD) {
+        extraction_result res = cdd_extract_bdd_and_dbm(copy);
+        copy = res.CDD_part;
+        dbm = res.dbm;
+        cdd bdd = res.BDD_part;
+        cdd bdd_intersect = bdd & safe;
+        if ( bdd_intersect != cdd_false())
+        {
+            dbm_down(dbm, size);
+            cdd past = cdd(dbm,size);
+            past &= bdd;
+            cdd escape = safe & past;
+            allThatKillsUs |= (past - escape);
+        }
+        else
+        {
+            dbm_down(dbm,size);
+            cdd past = cdd (dbm, size) & bdd;
+            allThatKillsUs |= past;
+        }
+    }
+    return allThatKillsUs;
+}
 
 cdd cdd_delay_invariant(const cdd& state, const cdd& invar)
 {
@@ -136,14 +166,15 @@ cdd cdd_past(const cdd& state)
 
 
 
-cdd cdd_apply_reset(const cdd& state, int32_t* clock_resets, int32_t* clock_values, int32_t* bool_resets, int32_t* bool_values, int32_t bdd_start_level )
+cdd cdd_apply_reset(const cdd& state, int32_t* clock_resets, int32_t* clock_values, int32_t num_clock_resets, int32_t* bool_resets, int32_t* bool_values, int32_t num_bool_resets)
 {
     uint32_t size = cdd_clocknum;
     ADBM(dbm);
     cdd copy= state;
-    copy = cdd_exist(copy, bool_resets, clock_resets);
+    copy = cdd_exist(copy, bool_resets, clock_resets, num_bool_resets,num_clock_resets);
     // Hint: if this quantifies a clock, the resulting CDD will include negative clock values
 
+    // apply bool updates
     for (int i=bdd_start_level;i<bdd_start_level+cdd_varnum; i++)
     {
         if (bool_resets[i] == 1) {
@@ -157,6 +188,7 @@ cdd cdd_apply_reset(const cdd& state, int32_t* clock_resets, int32_t* clock_valu
         }
     }
 
+    // apply clock resets
     cdd res= cdd_false();
     while (!cdd_isterminal(copy.root) && cdd_info(copy.root)->type != TYPE_BDD) {
         copy = cdd_remove_negative(copy);
@@ -174,13 +206,13 @@ cdd cdd_apply_reset(const cdd& state, int32_t* clock_resets, int32_t* clock_valu
 }
 
 
-cdd cdd_transition(const cdd& state, const cdd& guard, int32_t* clock_resets, int32_t* clock_values, int32_t* bool_resets, int32_t* bool_values, int32_t bdd_start_level )
+cdd cdd_transition(const cdd& state, const cdd& guard, int32_t* clock_resets, int32_t* clock_values, int32_t num_clock_resets, int32_t* bool_resets, int32_t* bool_values,   int32_t num_bool_resets )
 {
     uint32_t size = cdd_clocknum;
     ADBM(dbm);
     cdd copy= state;
     copy &= guard;
-    copy = cdd_exist(copy, bool_resets, clock_resets);
+    copy = cdd_exist(copy, bool_resets, clock_resets, num_bool_resets,num_clock_resets);
     // Hint: if this quantifies a clock, the resulting CDD will include negative clock values
 
     for (int i=bdd_start_level;i<bdd_start_level+cdd_varnum; i++)
@@ -212,7 +244,7 @@ cdd cdd_transition(const cdd& state, const cdd& guard, int32_t* clock_resets, in
     return res;
 }
 
-cdd cdd_transition_back(const cdd&  state, const cdd& guard, const cdd& update, int32_t* clock_resets, int32_t* bool_resets)
+cdd cdd_transition_back(const cdd&  state, const cdd& guard, const cdd& update, int32_t* clock_resets,  int32_t num_clock_resets, int32_t* bool_resets,  int32_t num_bool_resets)
 {
     cdd copy= state;
     // TODO: sanity check: implement cdd_is_update();
@@ -221,14 +253,14 @@ cdd cdd_transition_back(const cdd&  state, const cdd& guard, const cdd& update, 
     if (copy == cdd_false()) {
         return copy;
     }
-    copy = cdd_exist(copy, bool_resets, clock_resets);
+    copy = cdd_exist(copy, bool_resets, clock_resets, num_bool_resets, num_clock_resets);
     copy = cdd_remove_negative(copy);
     copy &= guard;
     return copy;
 }
 
-cdd cdd_transition_back_past(const cdd&  state, const cdd& guard, const cdd& update, int32_t* clock_resets, int32_t* bool_resets)
+cdd cdd_transition_back_past(const cdd&  state, const cdd& guard, const cdd& update, int32_t* clock_resets, int32_t num_clock_resets, int32_t* bool_resets, int32_t num_bool_resets)
 {
-    cdd result = cdd_transition_back(state,guard, update, clock_resets,bool_resets);
+    cdd result = cdd_transition_back(state,guard, update, clock_resets, num_clock_resets, bool_resets, num_bool_resets);
     return cdd_past(result);
 }

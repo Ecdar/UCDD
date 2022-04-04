@@ -547,10 +547,12 @@ extern int32_t cdd_nodecount(ddNode* dd);
  */
 extern int32_t cdd_edgecount(ddNode* dd);
 
+
 /**
  * Existential quantification. @todo
  */
-extern ddNode* cdd_exist(ddNode*, int32_t*, int32_t*);
+extern ddNode* cdd_exist(ddNode*, int32_t*, int32_t*, int32_t, int32_t );
+
 
 /**
  * Variable substitution. @todo
@@ -873,7 +875,7 @@ private:
     friend cdd cdd_bddnvarpp(int);
     friend cdd cdd_remove_negative(const cdd& node);
 
-    friend cdd cdd_exist(const cdd&, int32_t*, int32_t*);
+    friend cdd cdd_exist(const cdd&, int32_t*, int32_t*,int32_t, int32_t);
     friend cdd cdd_replace(const cdd&, int32_t*, int32_t*);
     friend int32_t cdd_nodecount(const cdd&);
     friend cdd cdd_apply(const cdd&, const cdd&, int);
@@ -885,16 +887,16 @@ private:
     friend cdd cdd_delay(const cdd&);
     friend cdd cdd_past(const cdd&);
     friend cdd cdd_delay_invariant(const cdd&, const cdd&);
-    friend cdd cdd_apply_reset(const cdd& state, int32_t* clock_resets, int32_t* clock_values, int32_t* bool_resets, int32_t* bool_values, int32_t bdd_start_level );
-    friend cdd cdd_transition(const cdd& state, const cdd& guard, int32_t* clock_resets, int32_t* clock_values, int32_t* bool_resets, int32_t* bool_values, int32_t bdd_start_level );
-    friend cdd cdd_transition_back(const cdd& state, const cdd& guard, const cdd& update, int32_t* clock_resets,  int32_t* bool_resets);
-    friend cdd cdd_transition_back_past(const cdd& state, const cdd& guard, const cdd& update, int32_t* clock_resets,  int32_t* bool_resets);
-
+    friend cdd cdd_apply_reset(const cdd& state, int32_t* clock_resets, int32_t* clock_values,  int32_t num_clock_resets, int32_t* bool_resets, int32_t* bool_values,  int32_t num_bool_resets );
+    friend cdd cdd_transition(const cdd& state, const cdd& guard, int32_t* clock_resets, int32_t* clock_values, int32_t num_clock_resets,int32_t* bool_resets, int32_t* bool_values, int32_t num_bool_resets);
+    friend cdd cdd_transition_back(const cdd& state, const cdd& guard, const cdd& update, int32_t* clock_resets,  int32_t num_clock_resets, int32_t* bool_resets,  int32_t num_bool_resets);
+    friend cdd cdd_transition_back_past(const cdd& state, const cdd& guard, const cdd& update, int32_t* clock_resets,  int32_t* bool_resets,  int32_t num_bool_resets);
+    friend cdd cdd_predt(const cdd& target, const cdd&  safe);
     friend cdd cdd_reduce2(const cdd&);
     friend bool cdd_contains(const cdd&, raw_t* dbm, int32_t dim);
     friend cdd cdd_extract_dbm(const cdd&, raw_t* dbm, int32_t dim);
     friend cdd cdd_extract_bdd(const cdd&, raw_t* dbm, int32_t dim);
-    friend extraction_result cdd_extract_bdd_and_dbm(const cdd&, raw_t* dbm, int32_t dim);
+    friend extraction_result cdd_extract_bdd_and_dbm(const cdd&);
     friend void cdd_fprintdot(FILE* ofile, const cdd&, bool push_negate);
     friend void cdd_printdot(const cdd&, bool push_negate);
     friend void cdd_fprint_code(FILE* ofile, const cdd&, cdd_print_varloc_f printer1, cdd_print_clockdiff_f printer2,
@@ -914,8 +916,8 @@ private:
 /** Structure for returning the results of extractDBM */
 typedef struct extraction_result
 {
-    cdd* CDD_part;   /**< The remainder of the CDD after removing a DBM */
-    cdd* BDD_part;   /**< The boolean part below a removed DBM */
+    cdd CDD_part;   /**< The remainder of the CDD after removing a DBM */
+    cdd BDD_part;   /**< The boolean part below a removed DBM */
     raw_t* dbm;        /**< the removed DBM */
 } extraction_result;
 
@@ -1025,11 +1027,15 @@ inline cdd cdd_true() { return cdd(cddtrue); }
  */
 inline cdd cdd_false() { return cdd(cddfalse); }
 
+
 /**
  * Existential quantification.
  * @todo
  */
-inline cdd cdd_exist(const cdd& r, int32_t* levels, int32_t* clocks) { return cdd(cdd_exist(r.root, levels, clocks)); }
+inline cdd cdd_exist(const cdd& r, int32_t* levels, int32_t* clocks, int32_t num_bools, int32_t num_clocks) {
+    return cdd(cdd_exist(r.root, levels, clocks, num_bools, num_clocks));
+}
+
 
 /**
  * Variable substitution.
