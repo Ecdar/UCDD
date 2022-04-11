@@ -313,7 +313,8 @@ extern ddNode* cdd_apply_tautology(ddNode* node, int32_t t_id);
 
 /**
  * @return the ID of a tautology node.
- * @pre cdd_is_extra_terminal(node)
+ * @pre cdd_is_
+ * extra_terminal(node)
  */
 extern int32_t cdd_get_tautology_id(ddNode* node);
 
