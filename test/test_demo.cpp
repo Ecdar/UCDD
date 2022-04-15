@@ -1015,10 +1015,49 @@ void downTest(size_t size, int number_of_DBMs, int32_t number_of_booleans, int32
     cdd_past(stateAfterGuard);
 }
 
+void apply_reset_test(size_t size, int number_of_DBMs, int32_t number_of_booleans, int32_t bdd_start_level)
+{
+    cdd b6 = cdd_bddvarpp(bdd_start_level + 0);
+    cdd b7 = cdd_bddvarpp(bdd_start_level + 1);
+    cdd b8 = cdd_bddvarpp(bdd_start_level + 2);
+    cdd b9 = cdd_bddvarpp(bdd_start_level + 3);
+    cdd stateBeforeTrans = cdd_true();
+
+    // Assume we start in an unconstrained state, with three clocks and 4 boolean variables
+    // We take a transition with guard (x1>5 && b6==true) | (x2<4 && b7==false)
+    cdd left = cdd_intervalpp(1, 0, 0, strict(5));
+    left &= cdd_intervalpp(2, 0, 0, strict(5));
+    left &= cdd_intervalpp(3, 0, 0, dbm_LS_INFINITY);
+    left &= cdd_intervalpp(1, 2, 0, nstrict(0));
+    left &= cdd_intervalpp(2, 1, 0, nstrict(0));
+    left = cdd_reduce(left);
+    cdd guard = left;
+    cdd stateAfterGuard = stateBeforeTrans & guard;
+    stateAfterGuard = cdd_reduce(stateAfterGuard);
+    print_cdd(stateAfterGuard, "afterGuard", true);
+
+    // the transition has an update of x1=0 & b7=true
+    // 1. apply the booleans
+    int clock_array[1];
+    int bool_array[0];
+    int clock_values[1];
+    int bool_values[0];
+    clock_array[0] = 1;
+    clock_values[0] = 0;
+//    clock_array[1] = 2;
+//    clock_values[1] = 0;
+    int* clkArrPtr = clock_array;
+    int* boolArrPtr = bool_array;
+    int* clkVluPtr = clock_values;
+    int* boolVluPtr = bool_values;
+
+    cdd afterReset = cdd_apply_reset(stateAfterGuard, clkArrPtr, clkVluPtr, 1,  boolArrPtr, boolVluPtr,0);
+
+    print_cdd(afterReset, "afterResets", true);
+}
 
 
-
-void traverseTransitionTest(size_t size, int number_of_DBMs, int32_t number_of_booleans, int32_t bdd_start_level) {
+    void traverseTransitionTest(size_t size, int number_of_DBMs, int32_t number_of_booleans, int32_t bdd_start_level) {
     cdd b6 = cdd_bddvarpp(bdd_start_level + 0);
     cdd b7 = cdd_bddvarpp(bdd_start_level + 1);
     cdd b8 = cdd_bddvarpp(bdd_start_level + 2);
@@ -1316,12 +1355,13 @@ int main(int argc, char *argv[]) {
     cdd_add_clocks(number_of_clocks_including_zero);
     int bdd_start_level = cdd_add_bddvar(number_of_booleans);
     cdd cdd_main;
-    bool run_all = true;
-    for (int i = 1; i <= 30; i++) {
+    bool run_all = false;
+    for (int i = 1; i <= 1; i++) {
         printf("running tests with seed %i\n", i);
         srand(i); //
         printf("Running the tests \n");
-        traverseTransitionTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
+        apply_reset_test(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
+//        traverseTransitionTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
         if (run_all) {
             predtTest(number_of_clocks_including_zero, bdd_start_level);
             extractDBMWithBoolsTest(number_of_clocks_including_zero, number_of_DBMs, bdd_start_level);
