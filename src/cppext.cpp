@@ -169,7 +169,7 @@ cdd cdd_past(const cdd& state)
 cdd cdd_apply_reset(const cdd& state, int32_t* clock_resets, int32_t* clock_values, int32_t num_clock_resets, int32_t* bool_resets, int32_t* bool_values, int32_t num_bool_resets)
 {
     uint32_t size = cdd_clocknum;
-    ADBM(dbm);
+    //ADBM(dbm);
     cdd copy= state;
     copy = cdd_exist(copy, bool_resets, clock_resets, num_bool_resets,num_clock_resets);
     // Hint: if this quantifies a clock, the resulting CDD will include negative clock values
@@ -192,8 +192,10 @@ cdd cdd_apply_reset(const cdd& state, int32_t* clock_resets, int32_t* clock_valu
     // apply clock resets
     cdd res= cdd_true();
     for (int i = 0; i < num_clock_resets; i++) {
-        res = res & cdd_lowerpp(0, clock_resets[i], clock_values[i]);
-        res = res & cdd_upperpp(0, clock_resets[i], clock_values[i]);
+        ADBM(dbm_for_bounds);
+        dbm_init(dbm_for_bounds, size);
+        dbm_updateValue(dbm_for_bounds, size, clock_resets[i] , clock_values[i]);
+        res |= (cdd(dbm_for_bounds,size));
     }
     print_cdd(res, "outputCDD",true);
     res = res & copy;
