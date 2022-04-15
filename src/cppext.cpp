@@ -177,7 +177,7 @@ cdd cdd_apply_reset(const cdd& state, int32_t* clock_resets, int32_t* clock_valu
     // apply bool updates
     for (int i=bdd_start_level;i<bdd_start_level+cdd_varnum; i++)
     {
-        if (bool_resets[i] == 1) {
+        if (bool_resets[i] == 1) { // TODO: FIX THIS TO THE NEW FORMAT OF LISTING RESETS
             if (bool_values[i]==1) {
                 copy = cdd_apply(copy, cdd_bddvarpp(i), cddop_and);
             }
@@ -190,7 +190,12 @@ cdd cdd_apply_reset(const cdd& state, int32_t* clock_resets, int32_t* clock_valu
 
     // apply clock resets
     cdd res= cdd_false();
-    while (!cdd_isterminal(copy.root) && cdd_info(copy.root)->type != TYPE_BDD) {
+    for (int i = 0; i < num_clock_resets; i++) {
+        res = res & cdd_lowerpp(0, clock_resets[i], clock_values[i]);
+        res = res & cdd_upperpp(0, clock_resets[i], clock_values[i]);
+    }
+    res = res & copy;
+/*    while (!cdd_isterminal(copy.root) && cdd_info(copy.root)->type != TYPE_BDD) {
         copy = cdd_remove_negative(copy);
         copy = cdd_reduce(copy);
         cdd bottom = cdd_extract_bdd(copy, dbm, size);
@@ -199,7 +204,8 @@ cdd cdd_apply_reset(const cdd& state, int32_t* clock_resets, int32_t* clock_valu
                 dbm_updateValue(dbm, size, clock_resets[i] , clock_values[i]);
         }
         res |= (cdd(dbm,size) & bottom);
-    }
+    }*/
+
     return res;
 }
 
@@ -226,7 +232,13 @@ cdd cdd_transition(const cdd& state, const cdd& guard, int32_t* clock_resets, in
         }
     }
 
-    cdd res= cdd_false();
+        cdd res= cdd_false();
+        for (int i = 0; i < num_clock_resets; i++) {
+            res = res & cdd_lowerpp(0, clock_resets[i], clock_values[i]);
+            res = res & cdd_upperpp(0, clock_resets[i], clock_values[i]);
+        }
+        res = res & copy;
+    /*cdd res= cdd_false();
     while (!cdd_isterminal(copy.root) && cdd_info(copy.root)->type != TYPE_BDD) {
         copy = cdd_remove_negative(copy);
         copy = cdd_reduce(copy);
@@ -238,7 +250,7 @@ cdd cdd_transition(const cdd& state, const cdd& guard, int32_t* clock_resets, in
             }
         }
         res |= (cdd(dbm,size) & bottom);
-    }
+    }*/
     return res;
 }
 
