@@ -199,6 +199,8 @@ cdd cdd_apply_reset(const cdd& state, int32_t* clock_resets, int32_t* clock_valu
 
         res &= (cdd(dbm_for_bounds,size));
     }
+    print_cdd(res, "res", true);
+    print_cdd(copy, "copy", true);
     res = res & copy;
 /*    while (!cdd_isterminal(copy.root) && cdd_info(copy.root)->type != TYPE_BDD) {
         copy = cdd_remove_negative(copy);
