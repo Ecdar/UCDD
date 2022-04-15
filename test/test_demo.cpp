@@ -1069,10 +1069,9 @@ void apply_reset_test2(size_t size, int number_of_DBMs, int32_t number_of_boolea
     // Assume we start in an unconstrained state, with three clocks and 4 boolean variables
     // We take a transition with guard (x1>5 && b6==true) | (x2<4 && b7==false)
     cdd left = cdd_intervalpp(1, 0, 0, nstrict(3));
-    left &= cdd_intervalpp(2, 0, 0, nstrict(3));
     left &= cdd_intervalpp(3, 0, 0, dbm_LS_INFINITY);
-    left &= cdd_intervalpp(1, 2, 0, nstrict(0));
-    left &= cdd_intervalpp(2, 1, 0, nstrict(0));
+    left &= cdd_intervalpp(1, 2, nstrict(0), nstrict(0));
+//    left &= cdd_intervalpp(2, 1, 0, nstrict(0));
     left = cdd_reduce(left);
     cdd guard = left;
     cdd stateAfterGuard = stateBeforeTrans & guard;
