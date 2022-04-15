@@ -195,6 +195,7 @@ cdd cdd_apply_reset(const cdd& state, int32_t* clock_resets, int32_t* clock_valu
         res = res & cdd_lowerpp(0, clock_resets[i], clock_values[i]);
         res = res & cdd_upperpp(0, clock_resets[i], clock_values[i]);
     }
+    print_cdd(res, "outputCDD",true);
     res = res & copy;
 /*    while (!cdd_isterminal(copy.root) && cdd_info(copy.root)->type != TYPE_BDD) {
         copy = cdd_remove_negative(copy);
