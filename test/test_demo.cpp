@@ -1063,12 +1063,14 @@ void apply_reset_test2(size_t size, int number_of_DBMs, int32_t number_of_boolea
     cdd stateBeforeTrans = cdd_true();
     cdd left = cdd_intervalpp(1, 0, 0, nstrict(3));
     left &= cdd_intervalpp(3, 0, 0, dbm_LS_INFINITY);
-    left &= cdd_intervalpp(1, 2, nstrict(0), nstrict(0));
+    left &= cdd_intervalpp(1, 2, strict(0), nstrict(0)); // TODO: someone explain to me me why the first has to be strict?
     left = cdd_reduce(left);
     cdd guard = left;
     cdd stateAfterGuard = stateBeforeTrans & guard;
     stateAfterGuard = cdd_reduce(stateAfterGuard);
     print_cdd(stateAfterGuard, "afterGuard", true);
+    ADBM(dbm);
+    cdd_extract_dbm(stateAfterGuard, dbm,size);
 
     int clock_array[1];
     int bool_array[0];
@@ -1080,11 +1082,12 @@ void apply_reset_test2(size_t size, int number_of_DBMs, int32_t number_of_boolea
     int* boolArrPtr = bool_array;
     int* clkVluPtr = clock_values;
     int* boolVluPtr = bool_values;
+    int numClockResets = 1;
 
-//    cdd afterReset = cdd_apply_reset(stateAfterGuard, clkArrPtr, clkVluPtr, 1,  boolArrPtr, boolVluPtr,0);
-    cdd afterReset = cdd_exist(stateAfterGuard,  boolArrPtr, clkArrPtr, 0, 1);
+    cdd afterReset = cdd_apply_reset(stateAfterGuard, clkArrPtr, clkVluPtr, numClockResets,  boolArrPtr, boolVluPtr,0);
+//    cdd afterReset = cdd_exist(stateAfterGuard,  boolArrPtr, clkArrPtr, 0, 1);
 
-    print_cdd(afterReset, "afterResets", true);
+    print_cdd(afterReset, "afterReset", true);
 }
 
 
@@ -1387,7 +1390,7 @@ int main(int argc, char *argv[]) {
     cdd_add_clocks(number_of_clocks_including_zero);
     int bdd_start_level = cdd_add_bddvar(number_of_booleans);
     cdd cdd_main;
-    bool run_all = false;
+    bool run_all = true;
     for (int i = 1; i <= 1; i++) {
         printf("running tests with seed %i\n", i);
         srand(i); //
