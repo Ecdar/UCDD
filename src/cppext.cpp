@@ -169,7 +169,6 @@ cdd cdd_past(const cdd& state)
 cdd cdd_apply_reset(const cdd& state, int32_t* clock_resets, int32_t* clock_values, int32_t num_clock_resets, int32_t* bool_resets, int32_t* bool_values, int32_t num_bool_resets)
 {
 
-    print_cdd(state, "input", true);
     uint32_t size = cdd_clocknum;
     //ADBM(dbm);
     cdd copy= state;
@@ -212,7 +211,7 @@ cdd cdd_apply_reset(const cdd& state, int32_t* clock_resets, int32_t* clock_valu
 
     while (!cdd_isterminal(copy.root) && cdd_info(copy.root)->type != TYPE_BDD) {
 
-        print_cdd(copy, "copy", true);
+
         copy = cdd_reduce(copy);
         extraction_result exres = cdd_extract_bdd_and_dbm(copy);
         cdd bottom = exres.BDD_part;
@@ -264,7 +263,6 @@ cdd cdd_transition(const cdd& state, const cdd& guard, int32_t* clock_resets, in
 
     while (!cdd_isterminal(copy.root) && cdd_info(copy.root)->type != TYPE_BDD) {
 
-        print_cdd(copy, "copy", true);
         copy = cdd_reduce(copy);
         extraction_result exres = cdd_extract_bdd_and_dbm(copy);
         cdd bottom = exres.BDD_part;
@@ -311,7 +309,6 @@ cdd cdd_transition_back(const cdd&  state, const cdd& guard, const cdd& update, 
     copy = cdd_remove_negative(copy);
 
     /*while (!cdd_isterminal(copy.root) && cdd_info(copy.root)->type != TYPE_BDD) {
-        print_cdd(copy, "copy", true);
         copy = cdd_reduce(copy);
         extraction_result exres = cdd_extract_bdd_and_dbm(copy);
         cdd bottom = exres.BDD_part;
