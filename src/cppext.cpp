@@ -317,7 +317,7 @@ cdd cdd_transition_back(const cdd&  state, const cdd& guard, const cdd& update, 
         }
         res |= (cdd(exres.dbm,size) & bottom);
     }
-    return res;
+    return res & guard;
 
 
 

@@ -1094,14 +1094,14 @@ void apply_reset_test2(size_t size, int number_of_DBMs, int32_t number_of_boolea
 void free_clock_test(size_t size, int number_of_DBMs, int32_t number_of_booleans, int32_t bdd_start_level)
 {
     cdd stateBeforeTrans = cdd_true();
-    cdd left = cdd_intervalpp(1, 0, 0, nstrict(3));
+    cdd left = cdd_intervalpp(1, 0, nstrict(0), nstrict(3));
     left &= cdd_intervalpp(3, 0, 0, dbm_LS_INFINITY);
-    left &= cdd_intervalpp(1, 2, strict(0), nstrict(0)); // TODO: someone explain to me me why the first has to be strict?
+    left &= cdd_intervalpp(2, 1, nstrict(7), nstrict(13)); // TODO: someone explain to me me why the first has to be strict?
     left = cdd_reduce(left);
     cdd guard = left;
     cdd stateAfterGuard = stateBeforeTrans & guard;
     stateAfterGuard = cdd_reduce(stateAfterGuard);
-    print_cdd(stateAfterGuard, "afterGuard", true);
+    print_cdd(stateAfterGuard, "afterGuard2", true);
     ADBM(dbm);
     cdd_extract_dbm(stateAfterGuard, dbm,size);
     dbm_print(stdout,dbm,size);
