@@ -1129,6 +1129,14 @@ void free_clock_test(size_t size, int number_of_DBMs, int32_t number_of_booleans
 }
 
 
+void delay_true_test(size_t size, int number_of_DBMs, int32_t number_of_booleans, int32_t bdd_start_level)
+{
+    cdd t = cdd_true();
+    print_cdd(t, true);
+    t= cdd_delay(t);
+    print_cdd(t, true);
+}
+
     void traverseTransitionTest(size_t size, int number_of_DBMs, int32_t number_of_booleans, int32_t bdd_start_level) {
     cdd b6 = cdd_bddvarpp(bdd_start_level + 0);
     cdd b7 = cdd_bddvarpp(bdd_start_level + 1);
@@ -1432,8 +1440,9 @@ int main(int argc, char *argv[]) {
         printf("running tests with seed %i\n", i);
         srand(i); //
         printf("Running the tests \n");
-        apply_reset_test2(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
-        free_clock_test(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
+        delay_true_test(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
+       // apply_reset_test2(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
+       // free_clock_test(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
 //        traverseTransitionTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
         if (run_all) {
             predtTest(number_of_clocks_including_zero, bdd_start_level);

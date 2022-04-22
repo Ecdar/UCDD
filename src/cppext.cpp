@@ -78,6 +78,8 @@ static raw_t* allocDBM(uint32_t dim) { return (raw_t*)malloc(dim * dim * sizeof(
 
 cdd cdd_delay(const cdd& state)
 {
+    if (cdd_equiv(state, cdd_true()))
+        return state;
     uint32_t size = cdd_clocknum;
     cdd copy= state;
     cdd res= cdd_false();
