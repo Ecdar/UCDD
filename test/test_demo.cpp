@@ -1091,6 +1091,43 @@ void apply_reset_test2(size_t size, int number_of_DBMs, int32_t number_of_boolea
 }
 
 
+void free_clock_test(size_t size, int number_of_DBMs, int32_t number_of_booleans, int32_t bdd_start_level)
+{
+    cdd stateBeforeTrans = cdd_true();
+    cdd left = cdd_intervalpp(1, 0, 0, nstrict(3));
+    left &= cdd_intervalpp(3, 0, 0, dbm_LS_INFINITY);
+    left &= cdd_intervalpp(1, 2, strict(0), nstrict(0)); // TODO: someone explain to me me why the first has to be strict?
+    left = cdd_reduce(left);
+    cdd guard = left;
+    cdd stateAfterGuard = stateBeforeTrans & guard;
+    stateAfterGuard = cdd_reduce(stateAfterGuard);
+    print_cdd(stateAfterGuard, "afterGuard", true);
+    ADBM(dbm);
+    cdd_extract_dbm(stateAfterGuard, dbm,size);
+    dbm_print(stdout,dbm,size);
+
+    int clock_array[1];
+    int bool_array[0];
+    int clock_values[1];
+    int bool_values[0];
+    clock_array[0] = 1;
+    clock_values[0] = 0;
+    int* clkArrPtr = clock_array;
+    int* boolArrPtr = bool_array;
+    int* clkVluPtr = clock_values;
+    int* boolVluPtr = bool_values;
+    int numClockResets = 1;
+
+    //cdd afterReset = cdd_apply_reset(stateAfterGuard, clkArrPtr, clkVluPtr, numClockResets,  boolArrPtr, boolVluPtr,0);
+    //    cdd afterReset = cdd_exist(stateAfterGuard,  boolArrPtr, clkArrPtr, 0, 1);
+
+    dbm_freeClock(dbm, 1,size);
+    dbm_print(stdout,dbm,size);
+    cdd* afterFree = new cdd(dbm,size);
+
+    print_cdd(*afterFree, "afterReset", true);
+}
+
 
     void traverseTransitionTest(size_t size, int number_of_DBMs, int32_t number_of_booleans, int32_t bdd_start_level) {
     cdd b6 = cdd_bddvarpp(bdd_start_level + 0);
@@ -1390,12 +1427,13 @@ int main(int argc, char *argv[]) {
     cdd_add_clocks(number_of_clocks_including_zero);
     int bdd_start_level = cdd_add_bddvar(number_of_booleans);
     cdd cdd_main;
-    bool run_all = true;
+    bool run_all = false;
     for (int i = 1; i <= 1; i++) {
         printf("running tests with seed %i\n", i);
         srand(i); //
         printf("Running the tests \n");
         apply_reset_test2(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
+        free_clock_test(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
 //        traverseTransitionTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
         if (run_all) {
             predtTest(number_of_clocks_including_zero, bdd_start_level);

@@ -291,6 +291,7 @@ return res;
 
 cdd cdd_transition_back(const cdd&  state, const cdd& guard, const cdd& update, int32_t* clock_resets,  int32_t num_clock_resets, int32_t* bool_resets,  int32_t num_bool_resets)
 {
+    uint32_t size = cdd_clocknum;
     cdd copy= state;
     // TODO: sanity check: implement cdd_is_update();
     // assert(ccd_is_update(update));
@@ -301,23 +302,22 @@ cdd cdd_transition_back(const cdd&  state, const cdd& guard, const cdd& update, 
     int empty[0];
     int* emptyPtr = empty;
     //copy = cdd_exist(copy, bool_resets, emptyPtr, num_bool_resets,0);
-// todo: this is wrong!
-    copy = cdd_exist(copy, bool_resets, clock_resets, num_bool_resets, num_clock_resets);
-    copy = cdd_remove_negative(copy);
 
     cdd res= cdd_false();
     copy = cdd_remove_negative(copy);
 
-    /*while (!cdd_isterminal(copy.root) && cdd_info(copy.root)->type != TYPE_BDD) {
+    while (!cdd_isterminal(copy.root) && cdd_info(copy.root)->type != TYPE_BDD) {
+
         copy = cdd_reduce(copy);
         extraction_result exres = cdd_extract_bdd_and_dbm(copy);
         cdd bottom = exres.BDD_part;
         copy = exres.CDD_part;
         for (int i = 0; i < num_clock_resets; i++) {
-            dbm_freeClock()
+            dbm_freeClock(exres.dbm, size, clock_resets[i]);
         }
         res |= (cdd(exres.dbm,size) & bottom);
-    }*/
+    }
+    return res;
 
 
 
