@@ -170,7 +170,7 @@ cdd cdd_past(const cdd& state)
 
 cdd cdd_apply_reset(const cdd& state, int32_t* clock_resets, int32_t* clock_values, int32_t num_clock_resets, int32_t* bool_resets, int32_t* bool_values, int32_t num_bool_resets)
 {
-
+    printf("resets %i %i", clock_resets[0], clock_values[0]);
     uint32_t size = cdd_clocknum;
     //ADBM(dbm);
     cdd copy= state;
@@ -217,7 +217,7 @@ cdd cdd_apply_reset(const cdd& state, int32_t* clock_resets, int32_t* clock_valu
         copy = cdd_reduce(copy);
         extraction_result exres = cdd_extract_bdd_and_dbm(copy);
         cdd bottom = exres.BDD_part;
-        copy = exres.CDD_part;
+        copy = cdd_reduce(cdd_remove_negative(exres.CDD_part));
         for (int i = 0; i < num_clock_resets; i++) {
             dbm_updateValue(exres.dbm, size, clock_resets[i] , clock_values[i]);
         }
