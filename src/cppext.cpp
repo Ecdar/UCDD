@@ -166,6 +166,11 @@ cdd cdd_past(const cdd& state)
     return res;
 }
 
+bool cdd_isBDD(const cdd& state)
+{
+    return cdd_info(state.handle())->type == TYPE_BDD;
+}
+
 
 
 cdd cdd_apply_reset(const cdd& state, int32_t* clock_resets, int32_t* clock_values, int32_t num_clock_resets, int32_t* bool_resets, int32_t* bool_values, int32_t num_bool_resets)

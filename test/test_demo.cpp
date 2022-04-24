@@ -1490,6 +1490,35 @@ int main(int argc, char *argv[]) {
     }
 
     cdd_done();
+/* Below shows the crash that happens when you try to extract a CDD from a pure BDD
+    cdd_init(1000000, 100000, 100000);
+    int bdd_start_level_new = cdd_add_bddvar(3);
+    cdd main = cdd_true();
+    main &= cdd_bddvarpp(bdd_start_level_new + 0);
+    main &= cdd_bddnvarpp(bdd_start_level_new + 1);
+    main &= cdd_bddnvarpp(bdd_start_level_new + 2);
+    size_t size = 0;
+    while (!cdd_isterminal(main.handle())) {
+        ADBM(dbm);
+        printf("started while\n");
+        cdd bdd = cdd_extract_bdd(main,dbm,size);
+        main = cdd_false();
+
+        printf("Printing CDD after extracting\n");
+    }
+
+    while (!cdd_isterminal(main.handle())) {
+
+        printf("started while\n");
+        extraction_result extracted;
+        extracted = cdd_extract_bdd_and_dbm(main);
+        main = extracted.CDD_part;
+
+        printf("Printing CDD after extracting\n");
+        print_cdd(extracted.BDD_part, "extractedBDD_while", true);
+    }
+
+*/
     std::cerr << "Completed Test Cases" << std::endl;
     exit(0);
 }
