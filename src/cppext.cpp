@@ -286,6 +286,7 @@ bdd_arrays cdd_bdd_to_array(const cdd& state, int num_bools)
     arys.values=resultArraysValues;
     arys.vars=resultArraysVars;
     arys.numTraces=currentTrace;
+    arys.numBools=num_bools;
 
    /* int32_t **test;
     int32_t **test1;

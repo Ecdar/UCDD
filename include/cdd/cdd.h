@@ -931,6 +931,7 @@ typedef struct bdd_arrays
     int32_t** vars;      /** the variables that are relevant */
     int32_t** values;   /** the value the variables have */
     int32_t numTraces;
+    int32_t numBools;
 } bdd_arrays;
 
 /**
