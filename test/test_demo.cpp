@@ -1065,9 +1065,17 @@ void bdd_thing_test(size_t size, int number_of_DBMs, int32_t number_of_booleans,
 
     cdd cdd_result = (b1 | (b2 & b3));
     print_cdd(cdd_result,"name", true);
-    cdd_bdd_to_array(cdd_result, 4);
-
+    bdd_arrays  arys = cdd_bdd_to_array(cdd_result, 4);
+    printf("Result: \n");
+    for (int i=0; i<= arys.numTraces; i++)
+    {
+        for (int j=0; j<= number_of_booleans; j++)
+           printf("%i\n", arys.vars[i][j] );
+    }
+    printf("done: \n");
 }
+
+
 
 
 void apply_reset_test2(size_t size, int number_of_DBMs, int32_t number_of_booleans, int32_t bdd_start_level)
