@@ -244,7 +244,7 @@ void cdd_bdd_to_array_rec(ddNode* r, int32_t* trace_vars,  int32_t* trace_values
         return;
     }
 
-    printf("after return condtions");
+
     if (cdd_info(r)->type == TYPE_BDD) {
         bddNode* node = bdd_node(r);
 
@@ -260,7 +260,7 @@ void cdd_bdd_to_array_rec(ddNode* r, int32_t* trace_vars,  int32_t* trace_values
         }
         trace_vars1[current_step]=node->level;
         trace_values1[current_step]=1;
-        printf("before next recurse");
+
 
         cdd_bdd_to_array_rec(node->high, trace_vars1,trace_values1,current_step+1, negated ^ cdd_is_negated(r), num_bools);
 
@@ -287,7 +287,7 @@ bdd_arrays cdd_bdd_to_array(const cdd& state, int num_bools)
         vars[i]=-1;
         values[i]=-1;
     }
-    printf("before array");
+    print_cdd(state,"debug.dot",true);
     cdd_bdd_to_array_rec(state.handle(),vars,values, 0,false, num_bools);
 
     int32_t *varRes = new int32_t[(num_bools-1)*(currentTrace-1)];
