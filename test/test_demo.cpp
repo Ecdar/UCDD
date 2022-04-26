@@ -1061,24 +1061,25 @@ void bdd_thing_test(size_t size, int number_of_DBMs, int32_t number_of_booleans,
     cdd b1 = cdd_bddvarpp(bdd_start_level + 0);
     cdd b2 = cdd_bddvarpp(bdd_start_level + 1);
     cdd b3 = cdd_bddvarpp(bdd_start_level + 2);
-    cdd b4 = cdd_bddvarpp(bdd_start_level + 3);
     int number_of_booleans_overwrite = 3;
     cdd cdd_result = (b1 | (b2 & b3));
     print_cdd(cdd_result,"name", true);
     bdd_arrays  arys = cdd_bdd_to_array(cdd_result, number_of_booleans_overwrite);
+    printf("numTraces: %i, numBools: %i \n", arys.numTraces, arys.numBools);
+
     printf("vars: \n");
-    for (int i=0; i<= arys.numTraces; i++)
+    for (int i=0; i< arys.numTraces; i++)
     {
         printf("trace: \n");
-        for (int j=0; j<= arys.numBools; j++)
-           printf("%i\n", arys.vars[i*number_of_booleans_overwrite + j] );
+        for (int j=0; j< arys.numBools; j++)
+           printf("%i\n", arys.vars[i*arys.numBools + j] );
     }
     printf("values: \n");
-    for (int i=0; i<= arys.numTraces; i++)
+    for (int i=0; i< arys.numTraces; i++)
     {
         printf("trace: \n");
-        for (int j=0; j<= arys.numBools; j++)
-            printf("%i\n", arys.values[i*number_of_booleans_overwrite + j] );
+        for (int j=0; j< arys.numBools; j++)
+            printf("%i\n", arys.values[i*arys.numBools + j] );
     }
     printf("done: \n");
 }
