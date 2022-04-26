@@ -282,16 +282,13 @@ bdd_arrays cdd_bdd_to_array(const cdd& state, int num_bools)
     resultArraysValues=new int*[maxNumberOfArrays];
 
     int vars[num_bools];
-    int* varsPtr = vars;
     int values[num_bools];
-    int* valuesPtr = values;
     for (int i = 0; i < num_bools; i++) {
         vars[i]=-1;
         values[i]=-1;
     }
-    cdd_bdd_to_array_rec(state.handle(),varsPtr,valuesPtr, 0,false, num_bools);
 
-    bdd_arrays arys;
+    cdd_bdd_to_array_rec(state.handle(),vars,values, 0,false, num_bools);
 
     int32_t *varRes = new int32_t[(num_bools-1)*(currentTrace-1)];
     int32_t *valRes = new int32_t[(num_bools-1)*(currentTrace-1)];
@@ -299,11 +296,12 @@ bdd_arrays cdd_bdd_to_array(const cdd& state, int num_bools)
     {
         for (uint32_t  j= 0; j<num_bools;j++)
         {
-            varRes[i*num_bools+j]= resultArraysVars[i][j];
-            valRes[i*num_bools+j]= resultArraysValues[i][j];
+            varRes[i*(num_bools-1)+j]= resultArraysVars[i][j];
+            valRes[i*(num_bools-1)+j]= resultArraysValues[i][j];
         }
     }
 
+    bdd_arrays arys;
     arys.values=valRes;
     arys.vars=varRes;
     arys.numTraces=currentTrace;
