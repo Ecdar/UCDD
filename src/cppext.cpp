@@ -210,7 +210,7 @@ void resizeArrays()
 
 void cdd_bdd_to_array_rec(ddNode* r, int32_t* trace_vars,  int32_t* trace_values, int32_t  current_step, bool negated, int num_bools)
 {
-    if (r == cddtrue) {
+    if (r == cddtrue && negated ==false) {
         if (currentTrace==maxNumberOfArrays-1)
             resizeArrays();
         resultArraysValues[currentTrace]=new int[num_bools];
@@ -223,11 +223,28 @@ void cdd_bdd_to_array_rec(ddNode* r, int32_t* trace_vars,  int32_t* trace_values
         currentTrace++;
         return;
     }
-    if (r == cddfalse)
-    {
-
+    if (r == cddtrue && negated ==true) {
         return;
     }
+    if (r == cddfalse && negated ==true)
+    {
+
+            if (currentTrace==maxNumberOfArrays-1)
+                resizeArrays();
+            resultArraysValues[currentTrace]=new int[num_bools];
+            resultArraysVars[currentTrace]=new int[num_bools];
+            int i;
+            for (i = 0; i <= (sizeof(trace_vars) / sizeof(trace_vars[0])); i++) {
+                resultArraysValues[currentTrace][i]=trace_values[i];
+                resultArraysVars[currentTrace][i]=trace_vars[i];
+            }
+            currentTrace++;
+            return;
+    }
+    if (r == cddfalse && negated == false) {
+        return;
+    }
+
 
     if (cdd_info(r)->type == TYPE_BDD) {
         bddNode* node = bdd_node(r);
