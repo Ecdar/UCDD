@@ -217,8 +217,6 @@ void cdd_bdd_to_array_rec(ddNode* r, int32_t* trace_vars,  int32_t* trace_values
         resultArraysVars[currentTrace]=new int[num_bools];
         int i;
         for (i = 0; i <= (sizeof(trace_vars) / sizeof(trace_vars[0])); i++) {
-            printf("%i\n", trace_vars[i]);
-            printf("%i\n", trace_values[i]);
             resultArraysValues[currentTrace][i]=trace_values[i];
             resultArraysVars[currentTrace][i]=trace_vars[i];
         }
@@ -227,7 +225,7 @@ void cdd_bdd_to_array_rec(ddNode* r, int32_t* trace_vars,  int32_t* trace_values
     }
     if (r == cddfalse)
     {
-        printf("incorrect trace");
+
         return;
     }
 
