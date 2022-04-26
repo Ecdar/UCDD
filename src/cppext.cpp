@@ -300,13 +300,6 @@ bdd_arrays cdd_bdd_to_array(const cdd& state, int num_bools)
     arys.numTraces=currentTrace;
     arys.numBools=num_bools;
 
-    for (int i=0; i<= arys.numTraces-1; i++)
-    {
-        for (int j=0; j<= num_bools; j++)
-            printf("%i\n", arys.vars[i*num_bools+j] );
-    }
-    printf("done! \n");
-
     for(int i = 0; i < currentTrace-1; ++i) {
         delete [] resultArraysVars[i];
         delete [] resultArraysValues[i];
