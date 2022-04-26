@@ -1547,6 +1547,14 @@ int main(int argc, char *argv[]) {
     }
 
     cdd_done();
+    cdd_init(1000000, 100000, 100000);
+    int bdd_start_level_new = cdd_add_bddvar(3);
+    cdd main = cdd_true();
+    main &= cdd_bddvarpp(bdd_start_level_new + 0);
+    main &= cdd_bddnvarpp(bdd_start_level_new + 1);
+    main &= cdd_bddnvarpp(bdd_start_level_new + 2);
+    printf("new bdd start level %i", bdd_start_level_new);
+    cdd_done();
 /* Below shows the crash that happens when you try to extract a CDD from a pure BDD
     cdd_init(1000000, 100000, 100000);
     int bdd_start_level_new = cdd_add_bddvar(3);
