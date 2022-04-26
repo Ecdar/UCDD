@@ -283,40 +283,36 @@ bdd_arrays cdd_bdd_to_array(const cdd& state, int num_bools)
     cdd_bdd_to_array_rec(state.handle(),varsPtr,valuesPtr, 0,false, num_bools);
 
     bdd_arrays arys;
-    arys.values=resultArraysValues;
-    arys.vars=resultArraysVars;
+
+    int varRes[num_bools*currentTrace];
+    int valRes[num_bools*currentTrace];
+    for (int i = 0; i< currentTrace; i++)
+    {
+        for (int j= 0; j<num_bools;j++)
+        {
+            varRes[i*num_bools+j]= resultArraysVars[i][j];
+            valRes[i*num_bools+j]= resultArraysVars[i][j];
+        }
+    }
+
+    arys.values=valRes;
+    arys.vars=varRes;
     arys.numTraces=currentTrace;
     arys.numBools=num_bools;
 
-   /* int32_t **test;
-    int32_t **test1;
-    for (int i=0; i<= arys.numTraces-1; i++) {
-        int32_t *interm;
-        int32_t *interm1;
-
-        for (int j = 0; j <= num_bools; j++) {
-            interm[j] = resultArraysVars[i][j];
-            interm1[j] = resultArraysValues[i][j];
-        }
-        test[i]=interm;
-        test1[i]=interm1;
-    }
-    arys.vars= test;
-    arys.values=test1;
-*/
     for (int i=0; i<= arys.numTraces-1; i++)
     {
         for (int j=0; j<= num_bools; j++)
-            printf("%i\n", arys.vars[i][j] );
+            printf("%i\n", arys.vars[i*num_bools+j] );
     }
-    printf("done: \n");
-/* // TODO: never deleted!
-    for(int i = 0; i < maxNumberOfArrays; ++i) {
+    printf("done! \n");
+
+    for(int i = 0; i < currentTrace-1; ++i) {
         delete [] resultArraysVars[i];
         delete [] resultArraysValues[i];
     }
     delete[] resultArraysVars;
-    delete[] resultArraysValues;*/
+    delete[] resultArraysValues;
     return arys;
 }
 

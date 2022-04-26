@@ -1070,7 +1070,7 @@ void bdd_thing_test(size_t size, int number_of_DBMs, int32_t number_of_booleans,
     for (int i=0; i<= arys.numTraces-1; i++)
     {
         for (int j=0; j<= number_of_booleans; j++)
-           printf("%i\n", arys.vars[i][j] );
+           printf("%i\n", arys.vars[i*number_of_booleans + j] );
     }
     printf("done: \n");
 }

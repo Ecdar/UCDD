@@ -928,8 +928,8 @@ typedef struct extraction_result
 /** Structure for returning the logical forumal of a BDD */
 typedef struct bdd_arrays
 {
-    int** vars;      /** the variables that are relevant */
-    int** values;   /** the value the variables have */
+    int* vars;      /** the variables that are relevant */
+    int* values;   /** the value the variables have */
     int32_t numTraces;
     int32_t numBools;
 } bdd_arrays;
