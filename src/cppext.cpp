@@ -195,7 +195,7 @@ void resizeArrays()
         newValuesArray[i] = resultArraysValues[i];
         newVarsArray[i] = resultArraysVars[i];
     }
-    for(int i = 0; i < maxNumberOfArrays; ++i) {
+    for(int i = 0; i < currentTrace; ++i) {
         delete [] resultArraysVars[i];
         delete [] resultArraysValues[i];
     }
@@ -282,11 +282,11 @@ bdd_arrays cdd_bdd_to_array(const cdd& state, int num_bools)
 
     bdd_arrays arys;
 
-    int varRes[num_bools*currentTrace];
-    int valRes[num_bools*currentTrace];
-    for (int i = 0; i< currentTrace; i++)
+    uint32_t  varRes[num_bools*currentTrace];
+    uint32_t  valRes[num_bools*currentTrace];
+    for (uint32_t  i = 0; i< currentTrace; i++)
     {
-        for (int j= 0; j<num_bools;j++)
+        for (uint32_t  j= 0; j<num_bools;j++)
         {
             varRes[i*num_bools+j]= resultArraysVars[i][j];
             valRes[i*num_bools+j]= resultArraysVars[i][j];
