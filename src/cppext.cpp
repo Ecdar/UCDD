@@ -277,7 +277,7 @@ void cdd_bdd_to_array_rec(ddNode* r, int32_t* trace_vars,  int32_t* trace_values
 bdd_arrays cdd_bdd_to_array(const cdd& state, int num_bools)
 {
     currentTrace=0;
-    maxNumberOfArrays=10;
+    maxNumberOfArrays=100;
     resultArraysVars=new int*[maxNumberOfArrays];
     resultArraysValues=new int*[maxNumberOfArrays];
 
