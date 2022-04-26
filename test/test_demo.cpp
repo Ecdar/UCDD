@@ -1100,16 +1100,19 @@ void bdd_conjunction_test(size_t size, int number_of_DBMs, int32_t number_of_boo
     {
         printf("trace: \n");
         for (int j=0; j< arys.numBools; j++)
-            printf("%i\n", arys.vars[i*arys.numBools + j] );
+            printf("%i\n", arys.vars[i*(arys.numBools-1) + j] );
     }
     printf("values: \n");
     for (int i=0; i< arys.numTraces; i++)
     {
         printf("trace: \n");
         for (int j=0; j< arys.numBools; j++)
-            printf("%i\n", arys.values[i*arys.numBools + j] );
+            printf("%i\n", arys.values[i*(arys.numBools-1) + j] );
     }
     printf("done: \n");
+    delete []arys.vars;
+    delete []arys.values;
+
 }
 
 
