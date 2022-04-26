@@ -282,8 +282,8 @@ bdd_arrays cdd_bdd_to_array(const cdd& state, int num_bools)
 
     bdd_arrays arys;
 
-    int32_t  varRes[num_bools*currentTrace];
-    int32_t  valRes[num_bools*currentTrace];
+    int32_t *varRes = new int32_t[num_bools*currentTrace];
+    int32_t *valRes = new int32_t[num_bools*currentTrace];
     for (uint32_t  i = 0; i< currentTrace; i++)
     {
         for (uint32_t  j= 0; j<num_bools;j++)
