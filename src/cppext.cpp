@@ -180,7 +180,7 @@ bool cdd_isBDD(const cdd& state)
 
 
 
-int maxNumberOfArrays=10;
+int maxNumberOfTraces =10;
 int** resultArraysVars;// = new int[arraySize];
 int** resultArraysValues;// = new int[arraySize];
 int currentTrace;
@@ -188,9 +188,9 @@ int currentTrace;
 void resizeArrays()
 {
     printf("resizing");
-    int ** newVarsArray = new int*[maxNumberOfArrays*2];
-    int ** newValuesArray = new int*[maxNumberOfArrays*2];
-    for (int i=0; i<maxNumberOfArrays;i++) {
+    int ** newVarsArray = new int*[maxNumberOfTraces *2];
+    int ** newValuesArray = new int*[maxNumberOfTraces *2];
+    for (int i=0; i< maxNumberOfTraces;i++) {
         newValuesArray[i] = resultArraysValues[i];
         newVarsArray[i] = resultArraysVars[i];
     }
@@ -200,7 +200,7 @@ void resizeArrays()
     }
     delete[] resultArraysVars;
     delete[] resultArraysValues;
-    maxNumberOfArrays=maxNumberOfArrays*2;
+    maxNumberOfTraces = maxNumberOfTraces *2;
     resultArraysVars = newVarsArray;
     resultArraysValues = newValuesArray;
 }
@@ -210,12 +210,12 @@ void resizeArrays()
 void cdd_bdd_to_array_rec(ddNode* r, int32_t* trace_vars,  int32_t* trace_values, int32_t  current_step, bool negated, int num_bools)
 {
     if (r == cddtrue && negated ==false) {
-        if (currentTrace==maxNumberOfArrays-1)
+        if (currentTrace== maxNumberOfTraces -1)
             resizeArrays();
         resultArraysValues[currentTrace]=new int[num_bools];
         resultArraysVars[currentTrace]=new int[num_bools];
         int i;
-        for (i = 0; i <= (sizeof(trace_vars) / sizeof(trace_vars[0])); i++) {
+        for (i = 0; i < num_bools; i++) {
             resultArraysValues[currentTrace][i]=trace_values[i];
             resultArraysVars[currentTrace][i]=trace_vars[i];
         }
@@ -228,12 +228,12 @@ void cdd_bdd_to_array_rec(ddNode* r, int32_t* trace_vars,  int32_t* trace_values
     if (r == cddfalse && negated ==true)
     {
 
-            if (currentTrace==maxNumberOfArrays-1)
+            if (currentTrace== maxNumberOfTraces -1)
                 resizeArrays();
             resultArraysValues[currentTrace]=new int[num_bools];
             resultArraysVars[currentTrace]=new int[num_bools];
             int i;
-            for (i = 0; i <= (sizeof(trace_vars) / sizeof(trace_vars[0])); i++) {
+            for (i = 0; i < num_bools; i++) {
                 resultArraysValues[currentTrace][i]=trace_values[i];
                 resultArraysVars[currentTrace][i]=trace_vars[i];
             }
@@ -277,9 +277,9 @@ void cdd_bdd_to_array_rec(ddNode* r, int32_t* trace_vars,  int32_t* trace_values
 bdd_arrays cdd_bdd_to_array(const cdd& state, int num_bools)
 {
     currentTrace=0;
-    maxNumberOfArrays=100;
-    resultArraysVars=new int*[maxNumberOfArrays];
-    resultArraysValues=new int*[maxNumberOfArrays];
+    maxNumberOfTraces =100;
+    resultArraysVars=new int*[maxNumberOfTraces];
+    resultArraysValues=new int*[maxNumberOfTraces];
 
     int vars[num_bools];
     int values[num_bools];
@@ -289,14 +289,16 @@ bdd_arrays cdd_bdd_to_array(const cdd& state, int num_bools)
     }
     cdd_bdd_to_array_rec(state.handle(),vars,values, 0,false, num_bools);
     printf("allocating now %i \n" ,(num_bools)*(currentTrace));
+
+
     int32_t *varRes = new int32_t[(num_bools)*(currentTrace)];
     int32_t *valRes = new int32_t[(num_bools)*(currentTrace)];
     for (uint32_t  i = 0; i< currentTrace; i++)
     {
         for (uint32_t  j= 0; j<num_bools;j++)
         {
-            varRes[i*(num_bools-1)+j]= resultArraysVars[i][j];
-            valRes[i*(num_bools-1)+j]= resultArraysValues[i][j];
+            varRes[i*(num_bools)+j]= resultArraysVars[i][j];
+            valRes[i*(num_bools)+j]= resultArraysValues[i][j];
         }
     }
 

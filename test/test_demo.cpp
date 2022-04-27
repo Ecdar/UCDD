@@ -1070,15 +1070,17 @@ void bdd_thing_test(size_t size, int number_of_DBMs, int32_t number_of_booleans,
     for (int i=0; i< arys.numTraces; i++)
     {
         printf("trace: \n");
-        for (int j=0; j< arys.numBools-1; j++)
-           printf("%i\n", arys.vars[i*arys.numBools + j] );
+        for (int j=0; j< arys.numBools; j++)
+           printf("%i ", arys.vars[i*arys.numBools + j] );
+        printf("\n");
     }
     printf("values: \n");
     for (int i=0; i< arys.numTraces; i++)
     {
         printf("trace: \n");
-        for (int j=0; j< arys.numBools-1; j++)
-            printf("%i %i\n", arys.values[i*arys.numBools + j], i*arys.numBools + j);
+        for (int j=0; j< arys.numBools; j++)
+            printf("%i ", arys.values[i*arys.numBools + j]);
+        printf("\n");
     }
     printf("done: \n");
     delete []arys.vars;
@@ -1099,15 +1101,17 @@ void bdd_conjunction_test(size_t size, int number_of_DBMs, int32_t number_of_boo
     for (int i=0; i< arys.numTraces; i++)
     {
         printf("trace: \n");
-        for (int j=0; j< arys.numBools-1; j++)
-            printf("%i\n", arys.vars[i*(arys.numBools-1) + j] );
+        for (int j=0; j< arys.numBools; j++)
+            printf("%i ", arys.vars[i*(arys.numBools) + j] );
+        printf("\n");
     }
     printf("values: \n");
     for (int i=0; i< arys.numTraces; i++)
     {
         printf("trace: \n");
-        for (int j=0; j< arys.numBools-1; j++)
-            printf("%i\n", arys.values[i*(arys.numBools-1) + j] );
+        for (int j=0; j< arys.numBools; j++)
+            printf("%i ", arys.values[i*(arys.numBools) + j] );
+        printf("\n");
     }
     printf("done: \n");
     delete []arys.vars;
@@ -1123,22 +1127,25 @@ void bdd_test_big(size_t size, int number_of_DBMs, int32_t number_of_booleans, i
     cdd b3 = cdd_bddvarpp(bdd_start_level + 2);
     cdd b4 = cdd_bddvarpp(bdd_start_level + 3);
     cdd cdd_result = ((b1 & !b2 & !b3) | (b2 & !b1 & !b4)) & !b4;
-    bdd_arrays  arys = cdd_bdd_to_array(cdd_result, number_of_booleans);
+    print_cdd(cdd_result, "out",true);
+    bdd_arrays  arys = cdd_bdd_to_array(cdd_result, number_of_booleans-1);
     printf("numTraces: %i, numBools: %i \n", arys.numTraces, arys.numBools);
 
     printf("vars: \n");
     for (int i=0; i< arys.numTraces; i++)
     {
         printf("trace: \n");
-        for (int j=0; j< arys.numBools-1; j++)
-            printf("%i\n", arys.vars[i*(arys.numBools-1) + j] );
+        for (int j=0; j< arys.numBools; j++)
+            printf("%i ", arys.vars[i*(arys.numBools) + j] );
+        printf("\n");
     }
     printf("values: \n");
     for (int i=0; i< arys.numTraces; i++)
     {
         printf("trace: \n");
-        for (int j=0; j< arys.numBools-1; j++)
-            printf("%i %i\n", arys.values[i*(arys.numBools-1) + j] ,i*(arys.numBools-1) + j);
+        for (int j=0; j< arys.numBools; j++)
+            printf("%i ", arys.values[i*(arys.numBools) + j]);
+        printf("\n");
     }
     printf("done: \n");
     delete []arys.vars;
@@ -1528,10 +1535,11 @@ int main(int argc, char *argv[]) {
         printf("running tests with seed %i\n", i);
         srand(i); //
         printf("Running the tests \n");
-        bdd_test_big(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
-        bdd_conjunction_test(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
         bdd_thing_test(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
-       // delay_true_test(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
+        bdd_conjunction_test(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
+        bdd_test_big(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
+
+        // delay_true_test(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
        // apply_reset_test2(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
        // free_clock_test(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
 //        traverseTransitionTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);

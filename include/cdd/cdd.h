@@ -925,7 +925,7 @@ typedef struct extraction_result
 } extraction_result;
 
 
-/** Structure for returning the logical forumal of a BDD */
+/** Structure for returning the logical formula of a BDD */
 typedef struct bdd_arrays
 {
     int32_t* vars;      /** the variables that are relevant */
