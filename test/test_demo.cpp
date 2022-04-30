@@ -1097,6 +1097,8 @@ void bdd_conjunction_test(size_t size, int number_of_DBMs, int32_t number_of_boo
     bdd_arrays  arys = cdd_bdd_to_array(cdd_result, number_of_booleans_overwrite);
     printf("numTraces: %i, numBools: %i \n", arys.numTraces, arys.numBools);
 
+
+
     printf("vars: \n");
     for (int i=0; i< arys.numTraces; i++)
     {
@@ -1590,12 +1592,13 @@ int main(int argc, char *argv[]) {
 
     cdd_done();
     cdd_init(1000000, 100000, 100000);
-    int bdd_start_level_new = cdd_add_bddvar(3);
-    cdd main = cdd_true();
-    main &= cdd_bddvarpp(bdd_start_level_new + 0);
-    main &= cdd_bddnvarpp(bdd_start_level_new + 1);
-    main &= cdd_bddnvarpp(bdd_start_level_new + 2);
+    cdd_add_clocks(2);
+    int bdd_start_level_new = cdd_add_bddvar(1);
+    cdd main = cdd_bddnvar(bdd_start_level_new + 0);
+    print_cdd(main, "test",true);
     printf("new bdd start level %i", bdd_start_level_new);
+    bdd_arrays arr = cdd_bdd_to_array(main,1);
+    printf("This should be 0: %i \n", arr.values[0]);
     cdd_done();
 /* Below shows the crash that happens when you try to extract a CDD from a pure BDD
     cdd_init(1000000, 100000, 100000);
