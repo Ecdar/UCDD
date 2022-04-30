@@ -1537,9 +1537,13 @@ int main(int argc, char *argv[]) {
         printf("running tests with seed %i\n", i);
         srand(i); //
         printf("Running the tests \n");
-        bdd_thing_test(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
-        bdd_conjunction_test(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
-        bdd_test_big(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
+
+
+        existTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
+
+        //bdd_thing_test(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
+        //bdd_conjunction_test(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
+        //bdd_test_big(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
 
         // delay_true_test(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
        // apply_reset_test2(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
@@ -1591,28 +1595,23 @@ int main(int argc, char *argv[]) {
     }
 
     cdd_done();
-    cdd_init(1000000, 100000, 100000);
+
+    cdd_init(100,100,100);
     cdd_add_clocks(2);
-    int bdd_start_level_new = cdd_add_bddvar(1);
-    cdd main = cdd_bddnvar(bdd_start_level_new + 0);
-    print_cdd(main, "test",true);
-    printf("new bdd start level %i\n", bdd_start_level_new);
-    bdd_arrays arr = cdd_bdd_to_array(main,1);
-    printf("This should be 0: %i \n", arr.values[0]);
-    cdd_done();
-
-
-
-    int32_t *valRes = new int32_t[2];
-    valRes[0]= 0;
-
-    bdd_arrays array;
-    array.values=valRes;
-    printf("Values[0]: %i \n" , array.values[0]);
-
-
-
-
+    int start_level = cdd_add_bddvar(1);
+    cdd b6 = cdd_bddnvarpp(start_level + 0);
+    const int num_bools =1;
+    const int num_clocks=0;
+    int arr[0] = {};
+    int *clockPtr = arr;
+    int arr1[num_bools] = {1};
+    int *boolPtr = arr1;
+    printf("before\n");
+    cdd result1 = cdd_apply_reset(b6, clockPtr, clockPtr, 0, boolPtr, boolPtr, 1);
+    printf("after\n");
+    result1 = cdd_reduce(result1);
+    print_cdd(b6, "pre_exist_resultnew", true);
+    print_cdd(result1, "exist_resultnew", true);
 
 
 
