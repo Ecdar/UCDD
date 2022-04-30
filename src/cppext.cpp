@@ -340,7 +340,7 @@ cdd cdd_apply_reset(const cdd& state, int32_t* clock_resets, int32_t* clock_valu
     cdd copy= state;
     int empty[0];
     int* emptyPtr = empty;
-    //copy = cdd_exist(copy, bool_resets, emptyPtr, num_bool_resets,0);
+    copy = cdd_exist(copy, bool_resets, emptyPtr, num_bool_resets,0);
     //copy = cdd_exist(copy, bool_resets, clock_resets, num_bool_resets,num_clock_resets);
     // Hint: if this quantifies a clock, the resulting CDD will include negative clock values
 /*
