@@ -362,11 +362,11 @@ cdd cdd_apply_reset(const cdd& state, int32_t* clock_resets, int32_t* clock_valu
     for (int i=0;i<num_bool_resets; i++)
     {
         if (bool_values[i]==1) {
-            copy = cdd_apply(copy, cdd_bddvarpp(bdd_start_level + bool_resets[i]), cddop_and);
+            copy = cdd_apply(copy, cdd_bddvarpp( bool_resets[i]), cddop_and);
         }
         else
         {
-            copy = cdd_apply(copy, cdd_bddnvarpp(bdd_start_level + bool_resets[i]), cddop_and);
+            copy = cdd_apply(copy, cdd_bddnvarpp(bool_resets[i]), cddop_and);
         }
     }
 
