@@ -298,7 +298,8 @@ bdd_arrays cdd_bdd_to_array(const cdd& state, int num_bools)
         for (uint32_t  j= 0; j<num_bools;j++)
         {
             varRes[i*(num_bools)+j]= resultArraysVars[i][j];
-            valRes[i*(num_bools)+j]= resultArraysValues[i][j];
+            printf(" val[0][0]: %i %i\n",resultArraysValues[i][j],i*(num_bools)+j);
+            valRes[i*(num_bools)+j]= 0;//resultArraysValues[i][j];
         }
     }
 
@@ -307,7 +308,7 @@ bdd_arrays cdd_bdd_to_array(const cdd& state, int num_bools)
     arys.vars=varRes;
     arys.numTraces=currentTrace;
     arys.numBools=num_bools;
-    printf("Values[0] on C side: %i " + arys.values[0]);
+    printf("Values[0] on C side: %i \n", arys.values[0]);
 
     for(int i = 0; i < currentTrace; ++i) {
         delete [] resultArraysVars[i];

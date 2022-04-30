@@ -1596,10 +1596,29 @@ int main(int argc, char *argv[]) {
     int bdd_start_level_new = cdd_add_bddvar(1);
     cdd main = cdd_bddnvar(bdd_start_level_new + 0);
     print_cdd(main, "test",true);
-    printf("new bdd start level %i", bdd_start_level_new);
+    printf("new bdd start level %i\n", bdd_start_level_new);
     bdd_arrays arr = cdd_bdd_to_array(main,1);
     printf("This should be 0: %i \n", arr.values[0]);
     cdd_done();
+
+
+
+    int32_t *valRes = new int32_t[2];
+    valRes[0]= 0;
+
+    bdd_arrays array;
+    array.values=valRes;
+    printf("Values[0]: %i \n" , array.values[0]);
+
+
+
+
+
+
+
+
+
+
 /* Below shows the crash that happens when you try to extract a CDD from a pure BDD
     cdd_init(1000000, 100000, 100000);
     int bdd_start_level_new = cdd_add_bddvar(3);
