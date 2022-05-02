@@ -299,7 +299,8 @@ bdd_arrays cdd_bdd_to_array(const cdd& state, int num_bools)
         {
             varRes[i*(num_bools)+j]= resultArraysVars[i][j];
             printf(" val[0][0]: %i %i\n",resultArraysValues[i][j],i*(num_bools)+j);
-            valRes[i*(num_bools)+j]= 0;//resultArraysValues[i][j];
+            printf(" vars[0][0]: %i %i\n",resultArraysVars[i][j],i*(num_bools)+j);
+            valRes[i*(num_bools)+j]= resultArraysValues[i][j];
         }
     }
 
@@ -309,6 +310,7 @@ bdd_arrays cdd_bdd_to_array(const cdd& state, int num_bools)
     arys.numTraces=currentTrace;
     arys.numBools=num_bools;
     printf("Values[0] on C side: %i \n", arys.values[0]);
+    printf("Vars[0] on C side: %i \n", arys.values[0]);
 
     for(int i = 0; i < currentTrace; ++i) {
         delete [] resultArraysVars[i];
@@ -335,12 +337,13 @@ bdd_arrays cdd_bdd_to_array(const cdd& state, int num_bools)
 
 cdd cdd_apply_reset(const cdd& state, int32_t* clock_resets, int32_t* clock_values, int32_t num_clock_resets, int32_t* bool_resets, int32_t* bool_values, int32_t num_bool_resets)
 {
+    printf("reached bool reset\n");
+    printf("bool resets[0] %i\n", bool_resets[0]);
     uint32_t size = cdd_clocknum;
     //ADBM(dbm);
     cdd copy= state;
     int empty[0];
     int* emptyPtr = empty;
-    printf("bool resets[0] %i\n", bool_resets[0]);
     copy = cdd_exist(copy, bool_resets, emptyPtr, num_bool_resets,0);
     //copy = cdd_exist(copy, bool_resets, clock_resets, num_bool_resets,num_clock_resets);
     // Hint: if this quantifies a clock, the resulting CDD will include negative clock values
