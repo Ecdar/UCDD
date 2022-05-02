@@ -1599,20 +1599,8 @@ int main(int argc, char *argv[]) {
     cdd_init(100,100,100);
     cdd_add_clocks(3);
     int start_level = cdd_add_bddvar(1);
-    cdd b6 = cdd_bddnvarpp(start_level + 0);
-    const int num_bools =1;
-    const int num_clocks=0;
-    int arr[0] = {};
-    int *clockPtr = arr;
-    int arr1[num_bools] = {1};
-    int *boolPtr = arr1;
-    printf("before\n");
-    cdd clocks = cdd_intervalpp(1,0,1,5);
-    clocks &= cdd_intervalpp(2,1,1,2);
-    clocks &= b6;
-
-    bdd_arrays arys = cdd_bdd_to_array(b6,1);
-    printf("after\n");
+    cdd nb6 = cdd_bddnvarpp(start_level + 0);
+    bdd_arrays arys = cdd_bdd_to_array(nb6,1);
 
 
     printf("vars: \n");
@@ -1634,6 +1622,33 @@ int main(int argc, char *argv[]) {
     printf("done: \n");
     delete []arys.vars;
     delete []arys.values;
+
+
+
+    cdd b6 = cdd_bddnvarpp(start_level + 0);
+    bdd_arrays arys1 = cdd_bdd_to_array(b6,1);
+
+
+    printf("vars: \n");
+    for (int i=0; i< arys1.numTraces; i++)
+    {
+        printf("trace: \n");
+        for (int j=0; j< arys1.numBools; j++)
+            printf("%i ", arys1.vars[i*arys1.numBools + j] );
+        printf("\n");
+    }
+    printf("values: \n");
+    for (int i=0; i< arys1.numTraces; i++)
+    {
+        printf("trace: \n");
+        for (int j=0; j< arys1.numBools; j++)
+            printf("%i ", arys1.values[i*arys1.numBools + j]);
+        printf("\n");
+    }
+    printf("done: \n");
+    delete []arys1.vars;
+    delete []arys1.values;
+
 
     cdd_done();
 
