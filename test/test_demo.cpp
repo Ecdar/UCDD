@@ -1539,7 +1539,7 @@ int main(int argc, char *argv[]) {
         printf("Running the tests \n");
 
 
-        existTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
+        //existTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
 
         //bdd_thing_test(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
         //bdd_conjunction_test(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
@@ -1610,6 +1610,7 @@ int main(int argc, char *argv[]) {
     cdd clocks = cdd_intervalpp(1,0,1,5);
     clocks &= cdd_intervalpp(2,1,1,2);
     clocks &= b6;
+
     bdd_arrays arys = cdd_bdd_to_array(b6,1);
     printf("after\n");
 
@@ -1634,6 +1635,7 @@ int main(int argc, char *argv[]) {
     delete []arys.vars;
     delete []arys.values;
 
+    cdd_done();
 
 
 
