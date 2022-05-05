@@ -1416,6 +1416,33 @@ void existTest(size_t size, int number_of_DBMs, int32_t number_of_booleans, int3
     //assert(result3==cdd_false());
 }
 
+
+
+
+
+void existTest1(size_t size, int number_of_DBMs, int32_t number_of_booleans, int32_t bdd_start_level) {
+    cdd cdd_part = randomCddFromDBMs(size, number_of_DBMs);
+    const int num_bools =1;
+    const int num_clocks=0;
+    int arr[num_clocks] = {};
+    int *clockPtr = arr;
+    int arr1[num_bools] = {6};
+    int *boolPtr = arr1;
+    cdd b6 = cdd_bddvarpp(bdd_start_level + 0);
+    cdd result1 = cdd_transition_back(cdd_part, cdd_true(), b6, clockPtr, num_clocks,boolPtr,num_bools);
+    print_cdd(result1, "exist_result_resetting_bools", true);
+
+    cdd result2 = cdd_exist(result1, boolPtr, clockPtr, num_bools,num_clocks);
+    result2 = cdd_reduce(result2);
+    print_cdd(result2, "exist_result2", true);
+
+    cdd  result3 = cdd_exist(result2, boolPtr, clockPtr, num_bools,num_clocks);
+    result3 = cdd_reduce(result3);
+    print_cdd(result3, "exist_result3", true);
+    //assert(result3==cdd_false());
+}
+
+
 static cdd MartijnTest(int bdd_start_level) {
     cdd b6 = cdd_bddvarpp(bdd_start_level + 0);
     cdd b7 = cdd_bddvarpp(bdd_start_level + 1);
@@ -1540,7 +1567,7 @@ int main(int argc, char *argv[]) {
 
 
         //existTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
-
+        existTest1(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
         //bdd_thing_test(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
         //bdd_conjunction_test(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
         //bdd_test_big(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);

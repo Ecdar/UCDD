@@ -298,7 +298,6 @@ bdd_arrays cdd_bdd_to_array(const cdd& state, int num_bools)
         values[i]=-1;
     }
     cdd_bdd_to_array_rec(state.handle(),vars,values, 0,false, num_bools);
-    printf("allocating now %i \n" ,(num_bools)*(currentTrace));
 
 
     int32_t *varRes = new int32_t[(num_bools)*(currentTrace)];
@@ -308,8 +307,6 @@ bdd_arrays cdd_bdd_to_array(const cdd& state, int num_bools)
         for (uint32_t  j= 0; j<num_bools;j++) {
             varRes[i * (num_bools) + j] = resultArraysVars[i][j];
             valRes[i * (num_bools) + j] = resultArraysValues[i][j];
-            printf(" vars[0][0]: %i %i\n", resultArraysVars[i][j], i * (num_bools) + j);
-            printf(" val[0][0]: %i %i\n", resultArraysValues[i][j], i * (num_bools) + j);
         }
     }
 
@@ -319,8 +316,6 @@ bdd_arrays cdd_bdd_to_array(const cdd& state, int num_bools)
     arys.vars=varRes;
     arys.numTraces=currentTrace;
     arys.numBools=num_bools;
-    printf("Values[0] on C side: %i \n", arys.values[0]);
-    printf("Vars[0] on C side: %i \n", arys.values[0]);
 
     for(int i = 0; i < currentTrace; ++i) {
         delete [] resultArraysVars[i];
@@ -347,8 +342,6 @@ bdd_arrays cdd_bdd_to_array(const cdd& state, int num_bools)
 
 cdd cdd_apply_reset(const cdd& state, int32_t* clock_resets, int32_t* clock_values, int32_t num_clock_resets, int32_t* bool_resets, int32_t* bool_values, int32_t num_bool_resets)
 {
-    printf("reached bool reset\n");
-    printf("bool resets[0] %i\n", bool_resets[0]);
     uint32_t size = cdd_clocknum;
     //ADBM(dbm);
     cdd copy= state;
@@ -460,10 +453,11 @@ cdd cdd_transition_back(const cdd&  state, const cdd& guard, const cdd& update, 
     if (copy == cdd_false()) {
         return copy;
     }
+
     int empty[0];
     int* emptyPtr = empty;
     copy = cdd_exist(copy, bool_resets, emptyPtr, num_bool_resets,0);
-
+    printf("transition back: num bools %i, bool_resets[0] %i, bdd_start_level %i  \n", num_bool_resets, bool_resets[0], bdd_start_level );
 
     if (cdd_info(copy.root)->type == TYPE_BDD)
         return copy;
