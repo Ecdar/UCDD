@@ -381,7 +381,7 @@ cdd cdd_apply_reset(const cdd& state, int32_t* clock_resets, int32_t* clock_valu
     copy = cdd_remove_negative(copy);
 
     if (cdd_info(copy.root)->type == TYPE_BDD)
-        return copy& guard;
+        return copy;
 
     while (!cdd_isterminal(copy.root) && cdd_info(copy.root)->type != TYPE_BDD) {
 
