@@ -381,7 +381,7 @@ cdd cdd_apply_reset(const cdd& state, int32_t* clock_resets, int32_t* clock_valu
     copy = cdd_remove_negative(copy);
 
     if (cdd_info(copy.root)->type == TYPE_BDD)
-        return copy;
+        return copy& guard;
 
     while (!cdd_isterminal(copy.root) && cdd_info(copy.root)->type != TYPE_BDD) {
 
@@ -426,7 +426,7 @@ cdd cdd_transition(const cdd& state, const cdd& guard, int32_t* clock_resets, in
     copy = cdd_remove_negative(copy);
 
     if (cdd_info(copy.root)->type == TYPE_BDD)
-        return copy;
+        return copy& guard;
 
     while (!cdd_isterminal(copy.root) && cdd_info(copy.root)->type != TYPE_BDD) {
 
@@ -460,9 +460,9 @@ cdd cdd_transition_back(const cdd&  state, const cdd& guard, const cdd& update, 
     printf("transition back: num bools %i, bool_resets[0] %i, bdd_start_level %i  \n", num_bool_resets, bool_resets[0], bdd_start_level );
 
     if (cdd_info(copy.root)->type == TYPE_BDD)
-        return copy;
+        return copy & guard;
     if (num_clock_resets==0)
-        return copy;
+        return copy & guard;
 
     cdd res= cdd_false();
     copy = cdd_remove_negative(copy);

@@ -1426,7 +1426,7 @@ void existTest1(size_t size, int number_of_DBMs, int32_t number_of_booleans, int
     const int num_clocks=0;
     int arr[num_clocks] = {};
     int *clockPtr = arr;
-    int arr1[num_bools] = {6};
+    int arr1[num_bools] = {bdd_start_level + 0};
     int *boolPtr = arr1;
     cdd b6 = cdd_bddvarpp(bdd_start_level + 0);
     cdd result1 = cdd_transition_back(cdd_part, cdd_true(), b6, clockPtr, num_clocks,boolPtr,num_bools);
@@ -1567,7 +1567,7 @@ int main(int argc, char *argv[]) {
 
 
         //existTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
-        existTest1(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
+        //existTest1(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
         //bdd_thing_test(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
         //bdd_conjunction_test(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
         //bdd_test_big(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
@@ -1678,7 +1678,13 @@ int main(int argc, char *argv[]) {
 
 
     cdd_done();
+    cdd_init(100,100,100);
+    cdd_add_clocks(2);
+    bdd_start_level=cdd_add_bddvar(1);
 
+    existTest1(2, 2, 1, bdd_start_level);
+
+    cdd_done();
 
 
 
