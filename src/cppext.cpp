@@ -462,14 +462,14 @@ cdd cdd_transition_back(const cdd&  state, const cdd& guard, const cdd& update, 
     if (num_bool_resets>0)
         printf("transition back: num bools %i, bool_resets[0] %i, bdd_start_level %i  \n", num_bool_resets, bool_resets[0], bdd_start_level );
 
-    if (cdd_info(copy.root)->type == TYPE_BDD)
-        return copy & guard;
     if (num_clock_resets==0)
+            return copy & guard;
+    if (!cdd_isterminal(copy.root) && cdd_info(copy.root)->type == TYPE_BDD)
         return copy & guard;
 
     cdd res= cdd_false();
     copy = cdd_remove_negative(copy);
-
+    printf("before the while");
     while (!cdd_isterminal(copy.root) && cdd_info(copy.root)->type != TYPE_BDD) {
 
         copy = cdd_reduce(copy);
