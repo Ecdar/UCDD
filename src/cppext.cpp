@@ -446,7 +446,6 @@ cdd cdd_transition(const cdd& state, const cdd& guard, int32_t* clock_resets, in
 cdd cdd_transition_back(const cdd&  state, const cdd& guard, const cdd& update, int32_t* clock_resets,  int32_t num_clock_resets, int32_t* bool_resets,  int32_t num_bool_resets)
 {
 
-    printf("transition back: reached C side\n");
     uint32_t size = cdd_clocknum;
     cdd copy= state;
     // TODO: sanity check: implement cdd_is_update();
@@ -459,8 +458,6 @@ cdd cdd_transition_back(const cdd&  state, const cdd& guard, const cdd& update, 
     int empty[0];
     int* emptyPtr = empty;
     copy = cdd_exist(copy, bool_resets, emptyPtr, num_bool_resets,0);
-    if (num_bool_resets>0)
-        printf("transition back: num bools %i, bool_resets[0] %i, bdd_start_level %i  \n", num_bool_resets, bool_resets[0], bdd_start_level );
 
     if (num_clock_resets==0)
             return copy & guard;
@@ -469,7 +466,6 @@ cdd cdd_transition_back(const cdd&  state, const cdd& guard, const cdd& update, 
 
     cdd res= cdd_false();
     copy = cdd_remove_negative(copy);
-    printf("before the while");
     while (!cdd_isterminal(copy.root) && cdd_info(copy.root)->type != TYPE_BDD) {
 
         copy = cdd_reduce(copy);
