@@ -1549,6 +1549,12 @@ static cdd MartijnTest(int bdd_start_level) {
 
 int main(int argc, char *argv[]) {
 
+    #ifndef NCLOSELU
+        printf("yes");
+    #else
+        printf("no");
+    #endif
+
     uint32_t number_of_clocks, number_of_clocks_including_zero, number_of_DBMs, number_of_booleans;
     number_of_clocks = 3;
     number_of_clocks_including_zero = number_of_clocks + 1;

@@ -899,6 +899,7 @@ private:
     friend bool cdd_contains(const cdd&, raw_t* dbm, int32_t dim);
     friend cdd cdd_extract_dbm(const cdd&, raw_t* dbm, int32_t dim);
     friend cdd cdd_extract_bdd(const cdd&, raw_t* dbm, int32_t dim);
+    friend raw_t* cdd_dbm_extrapolateMaxBounds_no_close(raw_t* dbm, cindex_t dim, const int32_t* max);
     friend extraction_result cdd_extract_bdd_and_dbm(const cdd&);
     friend void cdd_fprintdot(FILE* ofile, const cdd&, bool push_negate);
     friend void cdd_printdot(const cdd&, bool push_negate);

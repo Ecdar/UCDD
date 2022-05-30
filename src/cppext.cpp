@@ -13,6 +13,7 @@
 #include "cdd/kernel.h"
 
 uint32_t printCounter1 = 0; // Used to number printed CDDs
+#define DBM(I, J)  dbm[(I)*dim + (J)]
 
 static void print_cdd(cdd to_print, char *name, bool push_negate) {
     char filename[30];
@@ -32,6 +33,53 @@ cdd::cdd(const cdd& r)
     if (root)
         cdd_ref(root);
 }
+
+raw_t* cdd_dbm_extrapolateMaxBounds_no_close(raw_t* dbm, cindex_t dim, const int32_t* max)
+{
+    cindex_t i, j;
+    int changed = false;
+    assert(dbm && dim > 0 && max);
+
+    raw_t zero = CLOCKS_POSITIVE ? dbm_LE_ZERO : dbm_LS_INFINITY;
+
+    /* 1st row */
+    for (j = 1; j < dim; ++j) {
+        if (dbm_raw2bound(DBM(0, j)) < -max[j]) {
+            DBM(0, j) = (max[j] >= 0 ? dbm_bound2raw(-max[j], dbm_STRICT) : zero);
+
+            changed |= (max[j] > -dbm_INFINITY);
+        }
+    }
+
+    /* other rows */
+    for (i = 1; i < dim; ++i) {
+        for (j = 0; j < dim; ++j)
+            if (i != j) {
+                if (max[j] == -dbm_INFINITY) {
+                    DBM(i, j) = DBM(i, 0);
+                } else {
+                    /* if dbm[i,j] > max_xi (upper bound)
+                     *    dbm[i,j] = infinity
+                     * else if dbm[i,j] < -max_xj (lower bound)
+                     *    dbm[i,j] = lower bound
+                     * fi
+                     */
+                    int32_t bound = dbm_raw2bound(DBM(i, j));
+                    if (bound > max[i] && bound != dbm_INFINITY) {
+                        DBM(i, j) = dbm_LS_INFINITY;         /* raw */
+                        changed |= (max[i] > -dbm_INFINITY); /* bound */
+                    } else if (bound < -max[j]) {
+                        DBM(i, j) = dbm_bound2raw(-max[j], dbm_STRICT);
+                        changed = true;
+                    }
+                }
+            }
+    }
+    assert(dbm_isValid(dbm, dim));
+    return dbm;
+}
+
+
 
 cdd::cdd(const raw_t* dbm, uint32_t dim)
 {
