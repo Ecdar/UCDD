@@ -899,7 +899,7 @@ private:
     friend bool cdd_contains(const cdd&, raw_t* dbm, int32_t dim);
     friend cdd cdd_extract_dbm(const cdd&, raw_t* dbm, int32_t dim);
     friend cdd cdd_extract_bdd(const cdd&, raw_t* dbm, int32_t dim);
-    friend raw_t* cdd_dbm_extrapolateMaxBounds_no_close(raw_t* dbm, cindex_t dim, const int32_t* max);
+    friend raw_t* cdd_dbm_extrapolate_no_close(raw_t* dbm, cindex_t dim, const int32_t* max);
 
     friend extraction_result cdd_extract_bdd_and_dbm(const cdd&);
     friend void cdd_fprintdot(FILE* ofile, const cdd&, bool push_negate);
@@ -1115,7 +1115,7 @@ inline cdd cdd_reduce2(const cdd& r) { return cdd(cdd_reduce2(r.root)); }
  */
 inline cdd cdd_extract_dbm(const cdd& r, raw_t* dbm, int32_t dim) { return cdd(cdd_extract_dbm(r.root, dbm, dim)); }
 
-
+inline raw_t* cdd_dbm_extrapolate_no_close(raw_t* dbm, int32_t dim, int32_t* max) { return cdd_dbm_extrapolate_no_close(dbm, dim, max); }
 
 /**
  * Extract the bottom BDD of the first DBM in a given CDD

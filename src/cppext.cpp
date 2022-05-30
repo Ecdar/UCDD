@@ -34,7 +34,7 @@ cdd::cdd(const cdd& r)
         cdd_ref(root);
 }
 
-raw_t* cdd_dbm_extrapolateMaxBounds_no_close(raw_t* dbm, cindex_t dim, const int32_t* max)
+raw_t* cdd_dbm_extrapolate_no_close(raw_t* dbm, cindex_t dim, const int32_t* max)
 {
     cindex_t i, j;
     int changed = false;

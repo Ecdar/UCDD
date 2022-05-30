@@ -672,6 +672,20 @@ static void containsDBMTest(size_t size, int number_of_DBMs) {
     print_cdd(extracted, "extracted", false);
 }
 
+
+static void extrapolateTest(size_t size) {
+    ADBM(dbm);
+    DBM_GEN(dbm);
+    assert(dbm_isValid(dbm, size));
+
+    int32_t clock_array[1];
+    int32_t*  ptr = clock_array;
+    cdd_dbm_extrapolate_no_close(dbm, size, ptr);
+
+
+}
+
+
 static cdd buildCDDWithBooleansTest(size_t size, int number_of_DBMs, int number_of_booleans, int bdd_start_level) {
     printf("Building CDD with Booleans\n");
 
@@ -1571,7 +1585,7 @@ int main(int argc, char *argv[]) {
         srand(i); //
         printf("Running the tests \n");
 
-
+        extrapolateTest(number_of_clocks_including_zero, number_of_DBMs);
         //existTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
         //existTest1(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
         //bdd_thing_test(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
