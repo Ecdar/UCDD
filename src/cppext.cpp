@@ -194,10 +194,11 @@ cdd cdd_predt(const cdd&  target, const cdd&  safe)
         cdd good_part_with_fitting_bools = bdd_target & safe;
         if (good_part_with_fitting_bools != cdd_false())
         {
-
+            printf("before the big for \n");
             for (int i=0; i< pow(2,cdd_varnum); i++)
             {
                 cdd all_booleans = cdd_false();
+                printf("in the big for \n");
                 for (int j=0; j< cdd_varnum; j++) {
                     bool current = (i & 1 << j) != 0;
                     if (current) {
