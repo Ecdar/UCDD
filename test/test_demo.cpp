@@ -681,8 +681,6 @@ static void extrapolateTest(size_t size) {
     int32_t clock_array[1];
     int32_t*  ptr = clock_array;
     cdd_dbm_extrapolate_no_close(dbm, size, ptr);
-
-
 }
 
 
@@ -1585,7 +1583,6 @@ int main(int argc, char *argv[]) {
         srand(i); //
         printf("Running the tests \n");
 
-        extrapolateTest(number_of_clocks_including_zero, number_of_DBMs);
         //existTest(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
         //existTest1(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
         //bdd_thing_test(number_of_clocks_including_zero, number_of_DBMs, number_of_booleans, bdd_start_level);
