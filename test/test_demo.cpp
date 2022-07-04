@@ -20,6 +20,7 @@
 
 #include <iostream>
 #include <time.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "base/Timer.h"
@@ -1577,6 +1578,22 @@ int main(int argc, char *argv[]) {
     cdd_add_clocks(number_of_clocks_including_zero);
     int bdd_start_level = cdd_add_bddvar(number_of_booleans);
     cdd cdd_main;
+
+
+        printf("\n");
+    for (int i=0; i< pow(2,cdd_varnum); i++)
+    {
+        for (int j=0; j< cdd_varnum; j++) {
+            bool current = (i & 1 << j) != 0;
+            if (current)
+                printf("1");
+            else
+                printf("0");
+        }
+        printf("\n");
+    }
+    return 1;
+
     bool run_all = false;
     for (int i = 1; i <= 1; i++) {
         printf("running tests with seed %i\n", i);

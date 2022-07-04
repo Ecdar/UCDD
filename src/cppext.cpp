@@ -10,6 +10,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <malloc.h>
+#include <math.h>
 #include <dbm/print.h>
 #include "cdd/kernel.h"
 #include "dbm/fed.h"
@@ -199,30 +200,56 @@ cdd cdd_predt(const cdd&  target, const cdd&  safe)
             ADBM(dbm_good);
             cdd bdd_parts_reached = cdd_false();
 
-            dbm::fed_t* good_fed = new dbm::fed_t(cdd_clocknum);
-            while (!cdd_isterminal(good_copy.handle()) && cdd_info(good_copy.handle())->type != TYPE_BDD) {
-                extraction_result res_good = cdd_extract_bdd_and_dbm(good_copy);
-                good_copy = cdd_reduce(cdd_remove_negative(res_good.CDD_part));
-                dbm_good = res_good.dbm;
-                printf("current dbm_good \n");
-                dbm_print(stdout, dbm_good, size);
-                cdd bdd_good = res_good.BDD_part;
-                good_fed->add(dbm_good, size);
-                bdd_parts_reached |=bdd_good&bdd_target;
+            for (int i=0; i< pow(2,cdd_varnum); i++)
+            {
+                cdd all_booleans = cdd_false();
+                for (int j=0; j< cdd_varnum; j++) {
+                    bool current = (i & 1 << j) != 0;
+                    if (current) {
+                        all_booleans |= cdd_bddvarpp(j);
+                        printf("1");
+                    }
+                    else {
+                        all_booleans |= cdd_bddnvarpp(j);
+                        printf("0");
+                    }
+                }
+                printf("\n");
+
+                // for each possible combination of boolean variables,
+                // compute the part of safe that overlaps with it.
+
+                // no need to test combinations that dont satisfy the bad part
+                if (!cdd_equiv((all_booleans & bdd_target), cdd_false()) )
+                {
+                    assert(!cdd_eval_false((all_booleans & bdd_target)));
+                    good_copy = good_part_with_fitting_bools & all_booleans;
+                    if (!cdd_eval_false(good_copy)) {
+                        dbm::fed_t* good_fed = new dbm::fed_t(cdd_clocknum);
+                        while (!cdd_isterminal(good_copy.handle()) && cdd_info(good_copy.handle())->type != TYPE_BDD) {
+                            extraction_result res_good = cdd_extract_bdd_and_dbm(good_copy);
+                            good_copy = cdd_reduce(cdd_remove_negative(res_good.CDD_part));
+                            dbm_good = res_good.dbm;
+                            cdd bdd_good = res_good.BDD_part;
+                            good_fed->add(dbm_good, size);
+                        }
+
+                        dbm::fed_t pred_fed = bad_fed->predt(*good_fed);
+                        cdd_printdot(cdd_from_fed(pred_fed), true);
+                        allThatKillsUs |= cdd_from_fed(pred_fed) & all_booleans;
+                    }
+                    else
+                    {
+                        // for all boolean valuations we did not reach with our safe CDD, we take the past of the current target DBM
+                        cdd bdd_parts_not_reached = cdd_true() - bdd_parts_reached;
+                        dbm_down(dbm_target,size);
+                        cdd past = cdd (dbm_target, size) & bdd_parts_not_reached;
+                        allThatKillsUs |= past;
+                    }
+                }
+
+
             }
-
-            dbm::fed_t pred_fed = bad_fed->predt(*good_fed);
-            cdd_printdot(cdd_from_fed(pred_fed),true);
-
-            cdd_printdot(bdd_target,true);
-            allThatKillsUs |= cdd_from_fed(pred_fed);//&  bdd_target);
-            cdd_printdot(allThatKillsUs,true);
-
-            // for all boolean valuations we did not reach with our safe CDD, we take the past of the current target DBM
-            cdd bdd_parts_not_reached = cdd_true() - bdd_parts_reached;
-            dbm_down(dbm_target,size);
-            cdd past = cdd (dbm_target, size) & bdd_parts_not_reached;
-            allThatKillsUs |= past;
 
         }
         else
