@@ -214,6 +214,8 @@ cdd cdd_predt(const cdd&  target, const cdd&  safe)
 
             cdd_printdot(bdd_target,true);
             allThatKillsUs |= cdd_from_fed(pred_fed);//&  bdd_target);
+            cdd_printdot(allThatKillsUs,true);
+
             bdd_parts_reached |=  bdd_target;
             // for all boolean valuations we did not reach with our safe CDD, we take the past of the current target DBM
 
