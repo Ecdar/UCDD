@@ -202,11 +202,11 @@ cdd cdd_predt(const cdd&  target, const cdd&  safe)
                 for (int j=0; j< cdd_varnum; j++) {
                     bool current = (i & 1 << j) != 0;
                     if (current) {
-                        all_booleans |= cdd_bddvarpp(j);
+                        all_booleans |= cdd_bddvarpp(bdd_start_level+j);
                         printf("1");
                     }
                     else {
-                        all_booleans |= cdd_bddnvarpp(j);
+                        all_booleans |= cdd_bddnvarpp(bdd_start_level+j);
                         printf("0");
                     }
                 }
