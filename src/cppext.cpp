@@ -163,7 +163,7 @@ extraction_result cdd_extract_bdd_and_dbm(const cdd& state)
 
 cdd cdd_from_fed(const dbm::fed_t& fed)
 {
-    dbm::fed_t copy = fed;
+    dbm::fed_t copy = dbm::fed_t(fed);
     uint32_t size = cdd_clocknum;
     cdd res= cdd_false();
     while (copy.size()>0)
@@ -177,7 +177,7 @@ cdd cdd_from_fed(const dbm::fed_t& fed)
 
 cdd cdd_predt(const cdd&  target, const cdd&  safe)
 {
-    printf("Version: 2022-07-04 11:53\n");
+    printf("Version: 2022-07-04 12:01\n");
     cdd allThatKillsUs = cdd_false();
     uint32_t size = cdd_clocknum;
     cdd copy = target;
