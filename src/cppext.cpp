@@ -195,11 +195,6 @@ cdd cdd_predt(const cdd&  target, const cdd&  safe)
         if (good_part_with_fitting_bools != cdd_false())
         {
 
-            dbm::fed_t* bad_fed = new dbm::fed_t(dbm_target,cdd_clocknum);
-            cdd good_copy = good_part_with_fitting_bools;
-            ADBM(dbm_good);
-            cdd bdd_parts_reached = cdd_false();
-
             for (int i=0; i< pow(2,cdd_varnum); i++)
             {
                 cdd all_booleans = cdd_false();
@@ -222,8 +217,13 @@ cdd cdd_predt(const cdd&  target, const cdd&  safe)
                 // no need to test combinations that dont satisfy the bad part
                 if (!cdd_equiv((all_booleans & bdd_target), cdd_false()) )
                 {
+                    dbm::fed_t* bad_fed = new dbm::fed_t(dbm_target,cdd_clocknum);
+                    ADBM(dbm_good);
+                    printf("reaching assertion");
                     assert(!cdd_eval_false((all_booleans & bdd_target)));
-                    good_copy = good_part_with_fitting_bools & all_booleans;
+                    printf("passed assertion");
+
+                    cdd good_copy = good_part_with_fitting_bools & all_booleans;
                     if (!cdd_eval_false(good_copy)) {
                         dbm::fed_t* good_fed = new dbm::fed_t(cdd_clocknum);
                         while (!cdd_isterminal(good_copy.handle()) && cdd_info(good_copy.handle())->type != TYPE_BDD) {
