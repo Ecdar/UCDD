@@ -161,15 +161,16 @@ extraction_result cdd_extract_bdd_and_dbm(const cdd& state)
     return res;
 }
 
-cdd cdd_from_fed(dbm::fed_t& fed)
+cdd cdd_from_fed(const dbm::fed_t& fed)
 {
+    dbm::fed_t copy = fed;
     uint32_t size = cdd_clocknum;
     cdd res= cdd_false();
-    while (fed.size()>0)
+    while (copy.size()>0)
     {
-        dbm::dbm_t current = fed.const_dbmt();
+        dbm::dbm_t current = copy.const_dbmt();
         res |= cdd(current.dbm(),size);
-        fed.removeThisDBM(current);
+        copy.removeThisDBM(current);
     }
     return res;
 }
