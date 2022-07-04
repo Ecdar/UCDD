@@ -176,7 +176,7 @@ cdd cdd_from_fed(dbm::fed_t& fed)
 
 cdd cdd_predt(const cdd&  target, const cdd&  safe)
 {
-    printf("Version: 2022-07-04:11:40\n");
+    printf("Version: 2022-07-04 11:48\n");
     cdd allThatKillsUs = cdd_false();
     uint32_t size = cdd_clocknum;
     cdd copy = target;
@@ -211,13 +211,16 @@ cdd cdd_predt(const cdd&  target, const cdd&  safe)
 
             dbm::fed_t pred_fed = bad_fed->predt(*good_fed);
             cdd_printdot(cdd_from_fed(pred_fed),true);
-            allThatKillsUs |= (cdd_from_fed(pred_fed)&  bdd_target);
+
+            cdd_printdot(bdd_target,true);
+            allThatKillsUs |= cdd_from_fed(pred_fed);//&  bdd_target);
             bdd_parts_reached |=  bdd_target;
             // for all boolean valuations we did not reach with our safe CDD, we take the past of the current target DBM
 
         }
         else
         {
+            printf("reached the else part");
             dbm_down(dbm_target,size);
             cdd past = cdd (dbm_target, size) & bdd_target;
             allThatKillsUs |= past;
