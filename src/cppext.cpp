@@ -220,12 +220,11 @@ cdd cdd_predt(const cdd&  target, const cdd&  safe)
                 {
                     dbm::fed_t* bad_fed = new dbm::fed_t(dbm_target,cdd_clocknum);
                     ADBM(dbm_good);
-                    printf("reaching assertion");
                     assert(!cdd_eval_false((all_booleans & bdd_target)));
-                    printf("passed assertion");
-
                     cdd good_copy = good_part_with_fitting_bools & all_booleans;
+
                     if (!cdd_eval_false(good_copy)) {
+                        printf("found a combination satisfying both CDDs\n");
                         dbm::fed_t* good_fed = new dbm::fed_t(cdd_clocknum);
                         while (!cdd_isterminal(good_copy.handle()) && cdd_info(good_copy.handle())->type != TYPE_BDD) {
                             extraction_result res_good = cdd_extract_bdd_and_dbm(good_copy);
@@ -233,15 +232,21 @@ cdd cdd_predt(const cdd&  target, const cdd&  safe)
                             dbm_good = res_good.dbm;
                             cdd bdd_good = res_good.BDD_part;
                             good_fed->add(dbm_good, size);
+                            printf("extracting a BDM from good\n");
                         }
 
                         dbm::fed_t pred_fed = bad_fed->predt(*good_fed);
+                        printf("bad fed\n");
+                        cdd_printdot(cdd_from_fed(*bad_fed), true);
+                        printf("good fed\n");
+                        cdd_printdot(cdd_from_fed(*good_fed), true);
+                        printf("predt fed\n");
                         cdd_printdot(cdd_from_fed(pred_fed), true);
                         allThatKillsUs |= cdd_from_fed(pred_fed) & all_booleans;
                     }
                     else
                     {
-                        printf("reached the inner else");
+                        printf("reached the inner else\n");
                         // for all boolean valuations we did not reach with our safe CDD, we take the past of the current target DBM
                         ADBM(local);
                         dbm_copy(dbm_target,local,size);
@@ -257,7 +262,7 @@ cdd cdd_predt(const cdd&  target, const cdd&  safe)
         }
         else
         {
-            printf("reached the else part");
+            printf("reached the else part\n");
             dbm_down(dbm_target,size);
             cdd past = cdd (dbm_target, size) & bdd_target;
             allThatKillsUs |= past;
