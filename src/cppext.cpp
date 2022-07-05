@@ -249,7 +249,7 @@ cdd cdd_predt(const cdd&  target, const cdd&  safe)
                         printf("reached the inner else\n");
                         // for all boolean valuations we did not reach with our safe CDD, we take the past of the current target DBM
                         ADBM(local);
-                        dbm_copy(dbm_target,local,size);
+                        dbm_copy(local,dbm_target,size);
                         dbm_down(local,size);
                         cdd past = cdd (local, size) & all_booleans;
                         allThatKillsUs |= past;
