@@ -197,16 +197,16 @@ cdd cdd_predt(const cdd&  target, const cdd&  safe)
             printf("before the big for \n");
             for (int i=0; i< pow(2,cdd_varnum); i++)
             {
-                cdd all_booleans = cdd_false();
+                cdd all_booleans = cdd_true();
                 printf("in the big for \n");
                 for (int j=0; j< cdd_varnum; j++) {
                     bool current = (i & 1 << j) != 0;
                     if (current) {
-                        all_booleans |= cdd_bddvarpp(bdd_start_level+j);
+                        all_booleans &= cdd_bddvarpp(bdd_start_level+j);
                         printf("1");
                     }
                     else {
-                        all_booleans |= cdd_bddnvarpp(bdd_start_level+j);
+                        all_booleans &= cdd_bddnvarpp(bdd_start_level+j);
                         printf("0");
                     }
                 }
