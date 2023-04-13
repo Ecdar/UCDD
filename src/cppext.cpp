@@ -170,13 +170,13 @@ cdd cdd_predt_dbm(raw_t* dbm_target, cdd bdd_target, const cdd& safe)
             }
 
             // Paranoia check.
-            assert(!cdd_eval_false(all_booleans & bdd_target));
+            assert((all_booleans & bdd_target) != cdd_false());
 
             auto bad_fed = dbm::fed_t{dbm_target, (uint32_t)cdd_clocknum};
             ADBM(dbm_good, cdd_clocknum);
             cdd good_copy = good_part_with_fitting_bools & all_booleans;
 
-            if (!cdd_eval_false(good_copy)) {
+            if (good_copy != cdd_false()) {
                 auto good_fed = dbm::fed_t{(uint32_t)cdd_clocknum};
                 while (!cdd_isterminal(good_copy.handle()) && cdd_info(good_copy.handle())->type != TYPE_BDD) {
                     extraction_result res_good = cdd_extract_bdd_and_dbm(good_copy);
