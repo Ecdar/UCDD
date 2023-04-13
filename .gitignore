@@ -1,9 +1,3 @@
-Makefile
-
-# Cmake
-CMakeCache.txt
-CMakeFiles/
-
 # Editor backup files:
 *~
 
